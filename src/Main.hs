@@ -1,10 +1,3 @@
---
--- Main.hs
--- Copyright (C) 2016 Ivan Čukić <ivan.cukic(at)kde.org>
---
--- Distributed under terms of the MIT license.
---
-
 module Main where
 
 import Graphics.Gloss
@@ -14,10 +7,10 @@ import Graphics.Gloss.Interface.Pure.Simulate
 windowSize = 800
 
 window :: Display
-window = InWindow "Dark side" (800, 800) (10, 10)
+window = InWindow "Connect Four" (800, 800) (10, 10)
 
 background :: Color
-background = white
+background = black
 
 blockSize = 0.05
 
@@ -79,12 +72,13 @@ processEvent event world = world
 
 
 main :: IO ()
-main = Game.play
-           window
-           background
-           120
-           defaultModel
-           (scale 400 400 . view)
-           processEvent
-           [ update ]
+main = print "Hello World"
+-- main = Game.play
+--           window
+--           background
+--           120
+--           defaultModel
+--           (scale 400 400 . view)
+--           processEvent
+--           [ update ]
 
