@@ -1,7 +1,4 @@
 module Lib where
--- 1. posle cu da sakrivam stvari
--- 2. srediti kod da bude ugoodan
--- 3. videti da li mogu vrednosti da budu -1 1 0, jer je pogodnoo za fold
 import qualified Data.Vector as V
 import qualified Data.Matrix as M
 import qualified Data.Maybe as Mb
@@ -54,7 +51,7 @@ setFirstFree' c elem mat =
 -- za datu poziciju i, j i datu matricu proveriti da li se nalaze 4 spojene, dijagonaln vertikalno i horizontalno
 
 --dat vektor da li ima 4 elementa e
-
+--BUG! ne valja ovo
 fourInARow r e mat=
   let row = M.getRow r mat
       list = V.toList row
@@ -72,7 +69,7 @@ fourInARow r e mat=
 -- U -> 0
 
 -- treba namapirati celo sranje,
---trazi int -> Int -> Int
+--trazi int -> Int -> Int ne znam zasto
 slika :: Int -> Item -> Int
 slika _ e = case e of
             Red -> -1
