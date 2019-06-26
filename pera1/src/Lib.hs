@@ -114,22 +114,39 @@ slika _ e = case e of
             Blue -> 2
             U -> 0
 
+slika' item = case item of
+               Red -> 1
+               Blue -> 2
+               U -> 0
+
+mappedSample = fmap slika' sample
+
+
+--konverzija u listu listi
+
+
 --data (i,j) vratiti da li se dijagonalno nalaze 4 elementa e
---map'::(a -> b) -> Matrix
---
---kaze f is applied with too few
-  {-  map' f mat = map_helper f (M.nrows mat) mat
-
-map_helper:: (Eq a)=> (Int-> a -> a) -> Int -> M.Matrix a
-map_helper f 1 mat = M.mapRow 1 (f) mat
-map_helper f i mat = M.mapRow i (f) mat
--}
--- ne moze da se mapira u proizvoljnu matricu sa mapRows
-
 
 -- konverzija matrice u listu listi
 
 --toList:: Matrix a -> [[a]]
+
+-- dijagonalna provera
+--data je (i,j) pozicija i matrica, ako se nalazi dijagonalno 4 elementa od te pozicije, vraca taj element, u suprotnom poruku da nema 4 dijagonalno
+safeGet = M.safeGet
+
+
+fourDiag (i,j) mat =
+
+  let upLeft = (safeGet i j mat):(safeGet (i-1) (j-1) mat):(safeGet (i-2) (j-2) mat):(safeGet (i-3) (j-3) mat):[];
+      upRight = (safeGet i j mat):(safeGet (i-1) (j+1) mat):(safeGet (i-2) (j+2) mat):(safeGet (i-3) (j+3) mat):[];
+      downLeft = (safeGet i j mat):(safeGet (i+1) (j-1) mat):(safeGet (i+2) (j-2) mat):(safeGet (i+3) (j-3) mat):[];
+      downRight = (safeGet i j mat):(safeGet (i+1) (j+1) mat):(safeGet (i+2) (j+2) mat):(safeGet (i+3) (j+3) mat):[];
+      together = all (== head upLeft) upLeft : all (== head upRight) upRight : all (== head downLeft) downLeft : all (== head downRight) downRight :[];
+      in  if (or together) then Left (mat M.! (i,j))
+                           else Right "Diagonal not found!"
+
+
 sample1 = [U,U,U,U, Red,Red]
 sample2 = [Red,Blue,Red,Red,Red,Red]
 sample3 = [U,U,U,U, U, U ]
