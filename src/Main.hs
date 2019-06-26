@@ -7,7 +7,7 @@ import Graphics.Gloss.Interface.Pure.Simulate
 windowSize = 800
 
 window :: Display
-window = InWindow "Connect Four" (800, 800) (10, 10)
+window = InWindow "Connect Four" (windowSize, windowSize) (10, 10)
 
 background :: Color
 background = black
@@ -25,6 +25,8 @@ defaultModel = Model 0 0 0.005 0.003
 
 container :: Picture
 container = color black $ rectangleWire 2 2
+
+
 
 
 blockAt :: Float -> Float -> Picture
@@ -70,15 +72,15 @@ processEvent (EventKey (SpecialKey KeyRight) Down _ _) model = model { x = (1) -
 
 processEvent event world = world
 
-
+-- main = print "Hello World"
+-- 
 main :: IO ()
-main = print "Hello World"
--- main = Game.play
---           window
---           background
---           120
---           defaultModel
---           (scale 400 400 . view)
---           processEvent
---           [ update ]
+main = Game.play
+          window
+          background
+          120
+          defaultModel
+          (scale 400 400 . view)
+          processEvent
+          [ update ]
 
