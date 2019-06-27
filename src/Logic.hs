@@ -1,4 +1,4 @@
-module Logic(makeMat, setF)
+module Logic
    where
 
 import qualified Data.Vector as V
@@ -28,6 +28,12 @@ set' (i,j) e mat =
                                else Left "Error: Index out of bounds\n"
 
 --fromMatrixErr koji ako je Matrix validan vraca ga a ako nije neku default vrednost
+
+fromMatrixErr:: Matrix -> MatrixErr -> Matrix
+fromMatrixErr def mat = case mat of
+                         Left _ -> def
+                         Right x -> x
+
 
 type Matrix = M.Matrix Item
 matrica ::Int-> Matrix
