@@ -11,23 +11,15 @@ import qualified Game
 import qualified Config
 import qualified Pictures
 
-
-background :: Picture
-background = Pictures.board
-
 render :: Game.State -> Picture
 render state = Pictures.board
 
 main :: IO ()
 main = let size       = Config.windowSize
-           position   = (10, 10)
+           position   = (0, 0)
            fps        = 30
-           background = black
+           background = white
            window     = InWindow "Connect Four" size position
-           -- updates    = \ seconds state -> case Game.mode state of
-           --                                     Game.ModeSplash  -> state
-           --                                     Game.ModeStill   -> state
-           --                                     _                -> Game.update seconds state
        in Graphics.Gloss.Game.play
               window
               background
