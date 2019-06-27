@@ -1,15 +1,16 @@
 module Game where
 
-import qualified Board
-import qualified Config
+import qualified Board as B
+import qualified Config as C
 
 import Graphics.Gloss.Game
 
-data ItemState = ItemState { position  :: Board.Position
+data ItemState = ItemState { position  :: B.Position
 						   -- , fallingSpeed :: Float
 						   } deriving Show
 
-data Mode = ModeStart
+data Mode = ModeSplash
+		  | ModeStart
 		  | ModeWon
 		  | ModeLost
 		  | ModeClick
@@ -25,6 +26,7 @@ data State = State { objectsState :: [ItemState]
 -- Respoond when mouse is clicked
 handleEvent :: Event -> State -> State
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeStart }
+
 handleEvent (EventKey (MouseButton LeftButton) Down _ _) state = state { mode = ModeClick }
 handleEvent _ state = state
 
@@ -33,15 +35,15 @@ existsFour state item = True
 
 initialState :: State
 initialState = State { objectsState = []
-				     , mode         = ModeStart
-				     , windowSize   = Config.windowSize
+				     , mode         = ModeSplash
+				     , windowSize   = C.windowSize
 				     , contentScale = 1
                      }
 
 
 -- Game update
-update :: Float -> Game.State -> Game.State
-update _ oldState = 
+update :: Game.State -> Game.State
+update oldState = 
 		let newState  = oldState { Game.objectsState = objectsUpdate oldState
 								 } 
 		in if	existsFour newState Game.objectsState then oldState { mode = ModeWon }
@@ -51,4 +53,6 @@ update _ oldState =
 
 objectsUpdate :: Game.State -> [ItemState]
 objectsUpdate oldState =  [ItemState { position = (0,0)}]
--- 		
+-- objectsUpdate oldState = 
+-- 	let newItemState = case 
+-- 				

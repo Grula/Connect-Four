@@ -12,7 +12,12 @@ import qualified Config
 import qualified Pictures
 
 render :: Game.State -> Picture
-render state = Pictures.board
+render state = 
+    let splashScreen = Display.splash
+        boardScreen = Display.board
+    in case Game.mode state of
+        Game.ModeSplash -> splashScreen
+        _ ->            boardScreen
 
 main :: IO ()
 main = let size       = Config.windowSize
@@ -20,6 +25,9 @@ main = let size       = Config.windowSize
            fps        = 30
            background = white
            window     = InWindow "Connect Four" size position
+           updates    = \ _ state -> case Game.mode state of
+                                                Game.ModeSplash -> state
+                                                _               -> Game.update state
        in Graphics.Gloss.Game.play
               window
               background
@@ -27,5 +35,5 @@ main = let size       = Config.windowSize
               Game.initialState
               render
               Game.handleEvent
-              [Game.update]
+              [updates]
 
