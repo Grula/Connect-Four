@@ -2,7 +2,7 @@ module Board where
 
 import qualified Pictures
 
-type Position = (Int, Int)
+type Position = (Float, Float)
 
 boardData = [[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
 			 [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
