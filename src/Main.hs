@@ -15,8 +15,10 @@ render :: Game.State -> Picture
 render state = 
     let splashScreen = Display.splash
         boardScreen = Display.board
+        redCircle = Display.redC
     in case Game.mode state of
         Game.ModeSplash -> splashScreen
+        Game.ModeClick  -> Display.showAt 1 redCircle
         _ ->            boardScreen
 
 main :: IO ()
