@@ -5,7 +5,7 @@ import Graphics.Gloss.Game
 import Graphics.Gloss.Interface.Pure.Simulate
 import Graphics.Gloss.Data.ViewPort
 
-import qualified Display
+import qualified Display as D
 import qualified Board
 import qualified Game
 import qualified Config
@@ -13,17 +13,15 @@ import qualified Pictures
 
 render :: Game.State -> Picture
 render state = 
-    let splashScreen = Display.splash
-        redCircle = Display.redC
-        blueCircle = Display.blueC
-        content = pictures [ Display.board
-                          , redCircle
-                          , redCircle
-                          , redCircle
-                          ]
+    let splashScreen = D.splash
+        blueCircle = D.blueC
+        content = pictures [ D.board
+                           , D.redC $ head $ Game.objectsState state 
+                           ]
     in case Game.mode state of
         Game.ModeSplash -> splashScreen
-        _ ->				pictures [content]             
+        _ ->				pictures [ content
+                           			 ]             
         -- _ ->            pictures [ content 
         						 -- ]
 
