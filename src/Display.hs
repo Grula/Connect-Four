@@ -1,7 +1,7 @@
 module Display where
 
 import qualified Board
-import qualified Game
+-- import qualified Game
 -- import qualified Config
 import qualified Pictures as P
 
@@ -24,5 +24,8 @@ board =  P.board
 
 redC :: Picture
 redC = P.red_circle
+
+blueC :: Picture
+blueC = P.blue_circle
 
 -- circle state = showAt (Game.position state) $ P.red_circle

@@ -2,12 +2,14 @@ module Game where
 
 import qualified Board as B
 import qualified Config as C
+import qualified Display as D
 
 import Debug.Trace
 import Graphics.Gloss.Game
 
 data ItemState = ItemState { position  :: B.Position
 						   , player :: Int -- -1, 1
+						   , pic :: Picture
 						   } deriving Show
 
 data Mode = ModeSplash
@@ -37,6 +39,7 @@ handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = Mod
 handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = state { mode = ModeClick
 																		   , objectsState = [ItemState { position = (x,y)
 																		   							   , player = 1
+																		   							   , pic = D.redC
 																		   							   }
 																		   					]
 																		   }
