@@ -5,12 +5,16 @@ import qualified Data.Vector as V
 import qualified Data.Matrix as M
 import qualified Data.Maybe as Mb
 import qualified Data.List as L
+--import Game
+
+--ItemState
+
+
 
 -- preimenovane funkcije
 --
 makeMat = matrica
-setF = setFirstFree'
-
+--setF = setFirstFree'
 
 
 
@@ -34,7 +38,7 @@ fromMatrixErr def mat = case mat of
                          Left _ -> def
                          Right x -> x
 
-
+--sama matrica je matrica ItemState-ova
 type Matrix = M.Matrix Item
 matrica ::Int-> Matrix
 
@@ -51,6 +55,11 @@ set i j elem mat = M.setElem elem (i,j) mat
 
 
 sample = set 6 5 Red $ set 6 6 Red $ set 3 3 Blue $ set 4 3 Blue $ set 5 3 Blue $ set 6 3 Blue $ set 6 2 Red $ set 6 4 Red $ matrica 6
+
+--dodati funkciju za m x n matricu
+
+--sampleIS = set 1 1 (ItemState (1,1) 1 red) $ matrica 6
+--
 
 
 
@@ -127,7 +136,7 @@ slika' item = case item of
                Blue -> 2
                U -> 0
 
-mappedSample = fmap slika' sample
+--mappedSample = fmap slika' sample
 
 
 --konverzija u listu listi

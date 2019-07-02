@@ -1,7 +1,7 @@
 module Main where
 
 import Graphics.Gloss
-import Graphics.Gloss.Game 
+import Graphics.Gloss.Game
 import Graphics.Gloss.Interface.Pure.Simulate
 import Graphics.Gloss.Data.ViewPort
 
@@ -12,14 +12,14 @@ import qualified Config
 import qualified Pictures
 
 render :: Game.State -> Picture
-render state = 
+render state =
     let splashScreen = Display.splash
         boardScreen = Display.board
         redCircle = Display.redC
     in case Game.mode state of
         Game.ModeSplash -> splashScreen
-        Game.ModeClick  -> Display.showAt 1 redCircle
-        _ ->            boardScreen
+        --Game.ModeClick  -> Display.showAt 1 redCircle
+        _ -> Game.view state
 
 main :: IO ()
 main = let size       = Config.windowSize
@@ -27,15 +27,15 @@ main = let size       = Config.windowSize
            fps        = 30
            background = white
            window     = InWindow "Connect Four" size position
-           updates    = \ _ state -> case Game.mode state of
-                                                Game.ModeSplash -> state
-                                                _               -> Game.update state
+           updates    = \_ state -> case Game.mode state of
+                                         Game.ModeSplash -> state
+                                         _ -> Game.update 2 state
        in Graphics.Gloss.Game.play
               window
               background
               fps
               Game.initialState
-              render
+              (translate (0) (0) . render )
               Game.handleEvent
               [updates]
 

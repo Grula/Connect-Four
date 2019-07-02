@@ -21,4 +21,7 @@ executable connect-four
   build-depends:       base >= 4.7 && < 5,
                        gloss == 1.10.2.5,
                        gloss-game == 0.3.3.0,
-                       gloss-juicy == 0.2.2
+                       gloss-juicy == 0.2.2,
+                       vector >= 0.12,
+                       matrix >= 0.3,
+                       random >= 1.1
