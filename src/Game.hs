@@ -20,10 +20,11 @@ data Mode = ModeSplash
 		  | ModeClick
 		  deriving(Show, Eq)
 
-data State = State { objectsState :: [ItemState]
-				   , mode         :: Mode
-				   , windowSize   :: (Int, Int)
-				   , contentScale :: Float
+data State = State { objectsState  :: [ItemState]
+				   , currentPlayer :: Int
+				   , mode          :: Mode
+				   , windowSize    :: (Int, Int)
+				   , contentScale  :: Float
 				   } deriving Show
 
 				  
@@ -41,7 +42,8 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let dbg1 = 
 																	 in 
 																	 	dbg1 $ 
 																	 	state { mode = ModeClick
-																		   	   , objectsState = addState x y state			
+																		   	  , objectsState = addState x y state	
+																		   	  , currentPlayer = negate $ currentPlayer state		
 																		      }
 handleEvent _ state = state
 
@@ -49,14 +51,13 @@ handleEvent _ state = state
 existsFour state item = True
 
 addState :: Float -> Float -> State ->[ItemState]
-addState x y state = [ItemState { position = coordsToReal (x,y), player = 1 }] ++ objectsState state
+addState x y state = [ItemState { position = coordsToReal (x,y), player = negate $ player $ head$ Game.objectsState state }] ++ objectsState state
 
 
 y_osa = [159.5, 159.5-63.5..(-158.5)]
 x_osa = [-202.5, -202.5+66.. 195.5]
 
-
-x = (-141.5, 158.5)::(Float, Float)
+-- x = (-141.5, 158.5)::(Float, Float)
 
 coordsToReal:: (Float,Float) -> (Float, Float)
 coordsToReal (x,y) = let distances = fmap (\r -> abs(x-r)) x_osa
@@ -67,11 +68,6 @@ coordsToReal (x,y) = let distances = fmap (\r -> abs(x-r)) x_osa
                          min_distance_y = minimum distances_y
                          mmin_index_y = L.findIndex (==min_distance_y) distances_y
                          min_index_y = Mb.fromMaybe (-1) mmin_index_y
-
-
-
-
-
                      in ((x_osa !! min_index), (y_osa !! min_index_y))
 
 coords = [(x,y) | x <- x_osa, y <- y_osa]
@@ -84,16 +80,17 @@ initialState = State { objectsState = [ItemState { position = (-2000,-2000) -- h
 				     , mode         = ModeSplash
 				     , windowSize   = C.windowSize
 				     , contentScale = 1
+				     , currentPlayer = 1
                      }
 
 
 -- Game update
 update :: Game.State -> Game.State
 update oldState = 
-		let newState  = oldState { Game.objectsState = []
-								 } 
+		let newState  = oldState  
+			-- dbg = traceShow $ currentPlayer oldState
 		in if	existsFour newState Game.objectsState then oldState { mode = ModeWon }
-		   else newState
+		   else  newState
 
 -- isItemPositionValid position =
 

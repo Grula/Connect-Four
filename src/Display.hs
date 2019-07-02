@@ -16,7 +16,11 @@ showAt :: (Float, Float) -> Picture -> Picture
 showAt (x, y) = translate x y
 
 redC :: Game.ItemState -> Picture
-redC state =  showAt (Game.position state) $ P.red_circle
+redC state =  
+		let pl = Game.player state
+		in if (pl == 1 ) then showAt (Game.position state) $ P.red_circle
+		   else showAt (Game.position state) $ P.blue_circle
+
 
 splash :: Picture
 splash = P.splash
