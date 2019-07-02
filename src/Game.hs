@@ -5,7 +5,7 @@ import qualified Config as C
 
 import qualified Data.List as L
 import qualified Data.Maybe as Mb
-
+import qualified Data.Matrix as M
 import Debug.Trace
 import Graphics.Gloss.Game
 
@@ -27,7 +27,7 @@ data State = State { objectsState  :: [ItemState]
 				   , contentScale  :: Float
 				   } deriving Show
 
-				  
+
 
 -- addState :: B.Position -> ItemState
 -- addState coordinates = ItemState { position = coordinates
@@ -39,11 +39,11 @@ data State = State { objectsState  :: [ItemState]
 handleEvent :: Event -> State -> State
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeStart }
 handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let dbg1 = traceShow (x, y)
-																	 in 
-																	 	dbg1 $ 
+																	 in
+																	 	dbg1 $
 																	 	state { mode = ModeClick
-																		   	  , objectsState = addState x y state	
-																		   	  , currentPlayer = negate $ currentPlayer state		
+																		   	  , objectsState = addState x y state
+																		   	  , currentPlayer = negate $ currentPlayer state
 																		      }
 handleEvent _ state = state
 
@@ -72,6 +72,16 @@ coordsToReal (x,y) = let distances = fmap (\r -> abs(x-r)) x_osa
 
 coords = [(x,y) | x <- x_osa, y <- y_osa]
 
+mat = M.fromList 7 6 coords
+tmat = M.transpose mat
+-- ova matrica tmat predstavlja matricu koordinata krugova sa ekrana ispravnim redosledom
+
+
+
+
+
+
+
 initialState :: State
 initialState = State { objectsState = [ItemState { position = (-2000,-2000) -- hack avoid this
 												 , player = 1
@@ -86,8 +96,8 @@ initialState = State { objectsState = [ItemState { position = (-2000,-2000) -- h
 
 -- Game update
 update :: Game.State -> Game.State
-update oldState = 
-		let newState  = oldState  
+update oldState =
+		let newState  = oldState
 			-- dbg = traceShow $ currentPlayer oldState
 		in if	existsFour newState Game.objectsState then oldState { mode = ModeWon }
 		   else  newState
@@ -99,6 +109,6 @@ update oldState =
 -- 									 , player = 1
 -- 									 }
 -- 						  ]
--- objectsUpdate oldState = 
--- 	let newItemState = case 
-				
+-- objectsUpdate oldState =
+-- 	let newItemState = case
+
