@@ -17,7 +17,7 @@ makeMat = matrica
 --setF = setFirstFree'
 
 
-
+-- -1 1 0
 data Item = Blue | Red | U deriving (Show, Eq)
 
 --konstrukcija matrice

@@ -7,8 +7,11 @@ import Debug.Trace
 import Graphics.Gloss.Game
 import qualified Data.Vector as V
 import System.Random
---import Logic
+import Logic
 import qualified Data.Matrix as M
+import qualified Data.List as L
+import qualified Data.Maybe as Mb
+
 data ItemState = ItemState { position  :: B.Position
                            , player :: Int -- -1, 1, 0
                            , col :: Color
@@ -68,13 +71,13 @@ coordinatesToPosition (x,y) = let x_translated = (x + 240.0)
                               in (j, 1)
 
 -- matrix to List
-
-
+mat' = M.fromList 7 6 coords
+tmat' = M.transpose mat'
 initialState :: State
 --initialState = State { objectsState = []
 --				     , mode         = ModeSplash
 --				     , windowSize   = C.windowSize
---				     , contentScale = 1
+--				     , contentScale = 2
 --                     }
 
 configMat = [ "bbbbrrb",
@@ -98,21 +101,49 @@ con = V.fromList $ concat fzipWJ
 
 --new Coords
 
---vertical = [-240 +circleSize  + 10, (-240 + circleSize + 1+240/7).. 240 - circleSize - 10]
+--vertical = [-239 +circleSize  + 10, (-240 + circleSize + 1+240/7).. 240 - circleSize - 10]
 
 vertical' = [-200, -200+65.. 200]
 horizontal' = [170, 100.. (-170)]
 
 
+y_osa = [159.5, 159.5-67..(-158.5)]
+
+x_osa = [-202.5, -202.5+68.. 195.5]
 
 
-coords = [(x,y) | y <- horizontal', x <- vertical']
+x = (-141.5, 158.5)::(Float, Float)
+
+coordsToReal:: (Float,Float) -> (Float, Float)
+coordsToReal (x,y) = let distances = fmap (\r -> abs(x-r)) x_osa
+                         min_distance_x = minimum distances
+                         mmin_index = L.findIndex (==min_distance_x) distances
+                         min_index = Mb.fromMaybe (-1) mmin_index
+                         distances_y = fmap (\r -> abs(y-r)) y_osa
+                         min_distance_y = minimum distances_y
+                         mmin_index_y = L.findIndex (==min_distance_y) distances_y
+                         min_index_y = Mb.fromMaybe (-1) mmin_index_y
+
+
+                     in ((x_osa !! min_index), (y_osa !! min_index_y))
+
+coords = [(x,y) | x <- x_osa, y <- y_osa]
+
 
 listOfColors = V.fromList $ fmap (\((x,y), c)-> (c,x,y)) $ zip coords $ concat  configMat
 
 
 
 initialState' = State (fmap (\(c,x,y)-> ItemState (x,y) (0) (if c=='r' then red else blue)) listOfColors) ModeSplash C.windowSize 1
+
+
+elemet22 = M.getElem 2 2 tmat'
+
+
+--tmat'  prava
+--
+--coordsToIdx :: (Float, Float) -> (Int, Int)
+--coordsToIdx (x,y) = let
 
 
 
