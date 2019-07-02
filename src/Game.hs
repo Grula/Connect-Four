@@ -59,21 +59,26 @@ x_osa = [-202.5, -202.5+66.. 195.5]
 
 -- x = (-141.5, 158.5)::(Float, Float)
 
-coordsToReal:: (Float,Float) -> (Float, Float)
-coordsToReal (x,y) = let distances = fmap (\r -> abs(x-r)) x_osa
-                         min_distance_x = minimum distances
-                         mmin_index = L.findIndex (==min_distance_x) distances
-                         min_index = Mb.fromMaybe (-1) mmin_index
-                         distances_y = fmap (\r -> abs(y-r)) y_osa
-                         min_distance_y = minimum distances_y
-                         mmin_index_y = L.findIndex (==min_distance_y) distances_y
-                         min_index_y = Mb.fromMaybe (-1) mmin_index_y
-                     in ((x_osa !! min_index), (y_osa !! min_index_y))
+coordsToIndices :: (Float, Float) -> (Int, Int)
+coordsToIndices (x, y) = let 
+                            distances = fmap (\r -> abs(x-r)) x_osa
+                            min_distance_x = minimum distances
+                            mmin_index = L.findIndex (==min_distance_x) distances
+                            min_index = Mb.fromMaybe (-1) mmin_index
+                            distances_y = fmap (\r -> abs(y-r)) y_osa
+                            min_distance_y = minimum distances_y
+                            mmin_index_y = L.findIndex (==min_distance_y) distances_y
+                            min_index_y = Mb.fromMaybe (-1) mmin_index_y
+                         in (min_index, min_index_y)
 
-coords = [(x,y) | x <- x_osa, y <- y_osa]
+coordsToReal :: (Float, Float) -> (Float, Float)
+coordsToReal (x, y) = let (i, j) = coordsToIndices (x, y)
+                      in ((x_osa !! i), (y_osa !! j))
 
-mat = M.fromList 7 6 coords
-tmat = M.transpose mat
+-- coords = [(x,y) | x <- x_osa, y <- y_osa]
+
+-- mat = M.fromList 7 6 coords
+-- tmat = M.transpose mat
 -- ova matrica tmat predstavlja matricu koordinata krugova sa ekrana ispravnim redosledom
 
 
