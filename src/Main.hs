@@ -15,12 +15,12 @@ render :: Game.State -> Picture
 render state = 
     let splashScreen = D.splash
         blueCircle = D.blueC
-        content = pictures [ D.board
-                           , D.redC $ head $ Game.objectsState state 
-                           ]
+        content = pictures $ fmap D.redC $ Game.objectsState state 
+                           
     in case Game.mode state of
         Game.ModeSplash -> splashScreen
-        _ ->				pictures [ content
+        _ ->				pictures [ D.board
+        							 , content
                            			 ]             
         -- _ ->            pictures [ content 
         						 -- ]
