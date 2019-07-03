@@ -17,7 +17,6 @@ data Mode = ModeSplash
 		  | ModeStart
 		  | ModeWonBlue
 		  | ModeWonRed
-		  | ModeClick
 		  deriving(Show, Eq)
 
 data State = State { objectsState  :: [ItemState]
@@ -37,13 +36,12 @@ data State = State { objectsState  :: [ItemState]
 handleEvent :: Event -> State -> State
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeStart }
 -- Testing functions
--- handleEvent (EventKey (SpecialKey KeyDown) Down _ _) state = state { mode = ModeWonBlue }
--- handleEvent (EventKey (SpecialKey KeyUp) Down _ _) state = state { mode = ModeWonRed }
+handleEvent (EventKey (SpecialKey KeyDown) Down _ _) state = state { mode = ModeWonBlue }
+handleEvent (EventKey (SpecialKey KeyUp) Down _ _) state = state { mode = ModeWonRed }
 handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let dbg1 = traceShow (x, y)
 																	 in
 																	 	dbg1 $
-																	 	state { mode = ModeClick
-																		   	  , objectsState = addState x y state
+																	 	state { objectsState = addState x y state
 																		   	  , currentPlayer = negate $ currentPlayer state
 																		      }
 handleEvent _ state = state
