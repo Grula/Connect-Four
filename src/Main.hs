@@ -28,15 +28,16 @@ render state =
         Game.ModeSplash -> splashScreen
         Game.ModeWonBlue -> blueW
         Game.ModeWonRed -> redW
-        _ ->				pictures [ D.board
+        _ ->				pictures [ --D.board
+                       circlesAround Game.coords
         							 , content
-                           			 ]             
+                           			 ]
 
 main :: IO ()
 main = let size       = Config.windowSize
            position   = (0, 0)
            fps        = 30
-           background = white
+           background = light aquamarine
            window     = InWindow "Connect Four" size position
            updates    = \ _ state -> case Game.mode state of
                                                 Game.ModeSplash -> state
