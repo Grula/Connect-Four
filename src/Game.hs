@@ -18,7 +18,6 @@ data Mode = ModeSplash
 		  | ModeStart
 		  | ModeWonBlue
 		  | ModeWonRed
-		  | ModeClick
 		  deriving(Show, Eq)
 
 data State = State { objectsState  :: [ItemState]
@@ -38,9 +37,6 @@ data State = State { objectsState  :: [ItemState]
 -- Respoond when mouse is clicked
 handleEvent :: Event -> State -> State
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeStart }
--- Testing functions
--- handleEvent (EventKey (SpecialKey KeyDown) Down _ _) state = state { mode = ModeWonBlue }
--- handleEvent (EventKey (SpecialKey KeyUp) Down _ _) state = state { mode = ModeWonRed }
 handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let 
                                                                         dbg1 = traceShow (x, y)
                                                                         dbg2 = traceShow (coordsToIndices (x, y))
