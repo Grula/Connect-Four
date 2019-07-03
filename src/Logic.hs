@@ -8,18 +8,20 @@ import qualified Data.List as L
 
 -- preimenovane funkcije
 --
-makeMat = matrica
+makeMat = M.zero 6 7
 setF = setFirstFree'
 
 
 
 
-data Item = Blue | Red | U deriving (Show, Eq)
+--data Item = Blue | Red | U deriving (Show, Eq)
 
 --konstrukcija matrice
 
-type MatrixErr = Either String (M.Matrix Item)
+--type MatrixErr = Either String (M.Matrix Item)
 --predstavlja ili matricu ili poruku o gresci
+
+type MatrixErr = Either String (M.Matrix Int)
 
 set' (i,j) e mat =
   let n = M.nrows mat
@@ -35,11 +37,11 @@ fromMatrixErr def mat = case mat of
                          Right x -> x
 
 
-type Matrix = M.Matrix Item
-matrica ::Int-> Matrix
+type Matrix = M.Matrix Int
+--matrica ::Int-> Matrix
 
-matrica n = M.matrix n n $ \(i,j)->elem
-            where elem=U
+--matrica n = M.matrix n n $ \(i,j)->elem
+--            where elem=U
 
 -- postavi (i, j) element na elem, bez provere funkcija
 set i j elem mat = M.setElem elem (i,j) mat
@@ -50,7 +52,10 @@ set i j elem mat = M.setElem elem (i,j) mat
 
 
 
-sample = set 6 5 Red $ set 6 6 Red $ set 3 3 Blue $ set 4 3 Blue $ set 5 3 Blue $ set 6 3 Blue $ set 6 2 Red $ set 6 4 Red $ matrica 6
+sample = set 6 5 1 $ set 6 6 1 $ set 3 3 (-1) $ set 4 3 (-1) $ set 5 3 (-1) $ set 6 3 (-1) $ set 6 2 (-1) $ set 6 4 1 $ M.zero 6 7
+
+
+
 
 
 
@@ -67,12 +72,12 @@ setFirstFree r mat=
 --ovde obavezno obraditi gresku
 --ovde StrErr a -- ili poruka o gresci ili vrednost
 
-setFirstFree':: Int ->Item ->Matrix ->MatrixErr
+setFirstFree':: Int ->Int->Matrix ->MatrixErr
 setFirstFree' c elem mat =
   let col = M.getCol c mat
       m = M.ncols mat
       list = V.toList col
-      posU = if (head $ head $ L.group list) == U then
+      posU = if (head $ head $ L.group list) == 0 then
                                                   length( head $ L.group list)
                                                  else -1;
   in if posU == (-1) then Left "Can't set element" else (set' (posU, c) elem mat)
@@ -83,7 +88,8 @@ setFirstFree' c elem mat =
 
 --dat vektor da li ima 4 elementa e
 
-type ItemErr = Either Item String
+type IntErr = Either String Int
+
 -- unosi se red a vraca se item ili porka da takvog nema
 fourInARow r mat=
   let row = M.getRow r mat
@@ -91,8 +97,8 @@ fourInARow r mat=
       g = L.group list
       mf = L.find (\l -> length(l) >=4) g
   in case mf of
-        Nothing -> Right "For in a row not found\n"
-        Just (x:xs) -> Left x
+        Nothing -> Left "For in a row not found\n"
+        Just (x:xs) -> Right x
 
 --obrada maybe a sa caseovima
 fourInACol c mat=
@@ -101,8 +107,8 @@ fourInACol c mat=
       g = L.group list
       mf = L.find (\l -> length(l) >=4) g
   in case mf of
-        Nothing -> Right "For in a row not found\n"
-        Just (x:xs) -> Left x
+        Nothing -> Left "For in a row not found\n"
+        Just (x:xs) -> Right x
 
 
 --treba da vidim kako izbrojati tacno da li ih ima 4 u redu
@@ -116,18 +122,18 @@ fourInACol c mat=
 
 -- treba namapirati celo sranje,
 --trazi int -> Int -> Int ne znam zasto
-slika :: Int -> Item -> Int
-slika _ e = case e of
-            Red -> 1
-            Blue -> 2
-            U -> 0
+--slika :: Int -> Item -> Int
+--slika _ e = case e of
+    --        Red -> 1
+  --          Blue -> 2
+      --      U -> 0
 
-slika' item = case item of
-               Red -> 1
-               Blue -> 2
-               U -> 0
+--slika' item = case item of
+--               Red -> 1
+--               Blue -> 2
+--               U -> 0
 
-mappedSample = fmap slika' sample
+--mappedSample = fmap slika' sample
 
 
 --konverzija u listu listi
@@ -151,13 +157,13 @@ fourDiag (i,j) mat =
       downLeft = (safeGet i j mat):(safeGet (i+1) (j-1) mat):(safeGet (i+2) (j-2) mat):(safeGet (i+3) (j-3) mat):[];
       downRight = (safeGet i j mat):(safeGet (i+1) (j+1) mat):(safeGet (i+2) (j+2) mat):(safeGet (i+3) (j+3) mat):[];
       together = all (== head upLeft) upLeft : all (== head upRight) upRight : all (== head downLeft) downLeft : all (== head downRight) downRight :[];
-      in  if (or together) then Left (mat M.! (i,j))
-                           else Right "Diagonal not found!"
+      in  if (or together) then Right (mat M.! (i,j))
+                           else Left "Diagonal not found!"
 
 
-sample1 = [U,U,U,U, Red,Red]
-sample2 = [Red,Blue,Red,Red,Red,Red]
-sample3 = [U,U,U,U, U, U ]
+--sample1 = [U,U,U,U, Red,Red]
+--sample2 = [Red,Blue,Red,Red,Red,Red]
+--sample3 = [U,U,U,U, U, U ]
 
 
 someFunc :: IO ()
