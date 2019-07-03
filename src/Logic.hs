@@ -149,16 +149,42 @@ fourInACol c mat=
 --data je (i,j) pozicija i matrica, ako se nalazi dijagonalno 4 elementa od te pozicije, vraca taj element, u suprotnom poruku da nema 4 dijagonalno
 safeGet = M.safeGet
 
+-- Gets elements from matrix mat from indices in the list
+safeGetElems :: [(Int, Int)] -> M.Matrix a -> [Maybe a]
+safeGetElems [] _ = []
+safeGetElems ((i, j) : rest) mat = let elem = safeGet i j mat
+                                   in if Mb.isNothing elem
+                                    then [Nothing]
+                                    else elem : (safeGetElems rest mat)
 
-fourDiag (i,j) mat =
+-- Gets diagonals of element at (i, j)
+getDiags :: (Int, Int) -> M.Matrix a -> ([Maybe a], [Maybe a])
+getDiags (i, j) mat = let
+                          n = M.nrows mat
+                          m = M.ncols mat
+                          indices1 = (reverse (zip [i,i-1..1] [j,j-1..1])) ++ (zip [i+1..n] [j+1..m])
+                          indices2 = (reverse (zip [i,i-1..1] [j..m])) ++ (zip [i+1..n] [j-1, j-2..1])
+                      in (safeGetElems indices1 mat, safeGetElems indices2 mat)
 
-  let upLeft = (safeGet i j mat):(safeGet (i-1) (j-1) mat):(safeGet (i-2) (j-2) mat):(safeGet (i-3) (j-3) mat):[];
-      upRight = (safeGet i j mat):(safeGet (i-1) (j+1) mat):(safeGet (i-2) (j+2) mat):(safeGet (i-3) (j+3) mat):[];
-      downLeft = (safeGet i j mat):(safeGet (i+1) (j-1) mat):(safeGet (i+2) (j-2) mat):(safeGet (i+3) (j-3) mat):[];
-      downRight = (safeGet i j mat):(safeGet (i+1) (j+1) mat):(safeGet (i+2) (j+2) mat):(safeGet (i+3) (j+3) mat):[];
-      together = all (== head upLeft) upLeft : all (== head upRight) upRight : all (== head downLeft) downLeft : all (== head downRight) downRight :[];
-      in  if (or together) then Right (mat M.! (i,j))
-                           else Left "Diagonal not found!"
+fourDiag :: (Eq a) => (Int, Int) -> M.Matrix a -> Bool
+fourDiag (i, j) mat = let
+                        (diag_list_1, diag_list_2) = getDiags (i, j) mat
+                        g1 = L.group diag_list_1
+                        g2 = L.group diag_list_2 
+                        mf1 = L.find (\l -> length(l) >= 4) g1
+                        mf2 = L.find (\l -> length(l) >= 4) g2
+                      in if Mb.isNothing mf1 && Mb.isNothing mf2
+                        then False
+                        else True
+
+-- fourDiag (i,j) mat = let 
+--                         upLeft = (safeGet i j mat):(safeGet (i-1) (j-1) mat):(safeGet (i-2) (j-2) mat):(safeGet (i-3) (j-3) mat):[];
+--                         upRight = (safeGet i j mat):(safeGet (i-1) (j+1) mat):(safeGet (i-2) (j+2) mat):(safeGet (i-3) (j+3) mat):[];
+--                         downLeft = (safeGet i j mat):(safeGet (i+1) (j-1) mat):(safeGet (i+2) (j-2) mat):(safeGet (i+3) (j-3) mat):[];
+--                         downRight = (safeGet i j mat):(safeGet (i+1) (j+1) mat):(safeGet (i+2) (j+2) mat):(safeGet (i+3) (j+3) mat):[];
+--                         together = all (== head upLeft) upLeft : all (== head upRight) upRight : all (== head downLeft) downLeft : all (== head downRight) downRight :[];
+--                       in  if (or together) then Right (mat M.! (i,j))
+--                             else Left "Diagonal not found!"
 
 
 --sample1 = [U,U,U,U, Red,Red]

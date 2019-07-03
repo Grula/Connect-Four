@@ -22,4 +22,5 @@ executable connect-four
                        gloss == 1.10.2.5,
                        gloss-game == 0.3.3.0,
                        gloss-juicy == 0.2.2,
-                       matrix >= 0.3
+                       matrix >= 0.3,
+                       vector
