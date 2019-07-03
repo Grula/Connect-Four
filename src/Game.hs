@@ -57,6 +57,13 @@ x_osa = [-202.5, -202.5+66.. 195.5]
 
 -- x = (-141.5, 158.5)::(Float, Float)
 
+
+
+
+
+
+
+
 coordsToIndices :: (Float, Float) -> (Int, Int)
 coordsToIndices (x, y) = let
                             distances = fmap (\r -> abs(x-r)) x_osa
@@ -74,6 +81,11 @@ coordsToReal (x, y) = let (i, j) = coordsToIndices (x, y)
                       in ((x_osa !! (j-1)), (y_osa !! (i-1))) --hack
 
 coords = [(x,y) | x <- x_osa, y <- y_osa]
+
+circlesAround:: [(Float,Float)] -> Picture
+circlesAround coords = pictures $ fmap (\(x,y)-> color blue $ translate x y $ circle 28) coords
+
+
 
 mat = M.fromList 7 6 coords
 tmat = M.transpose mat

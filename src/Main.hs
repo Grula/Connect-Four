@@ -1,7 +1,7 @@
 module Main where
 
 import Graphics.Gloss
-import Graphics.Gloss.Game 
+import Graphics.Gloss.Game
 import Graphics.Gloss.Interface.Pure.Simulate
 import Graphics.Gloss.Data.ViewPort
 
@@ -12,17 +12,18 @@ import qualified Config
 import qualified Pictures
 
 render :: Game.State -> Picture
-render state = 
+render state =
     let splashScreen = D.splash
         blueCircle = D.blueC
-        content = pictures $ fmap D.redC $ Game.objectsState state 
-                           
+        content = pictures $ fmap D.redC $ Game.objectsState state
+
     in case Game.mode state of
         Game.ModeSplash -> splashScreen
-        _ ->				pictures [ D.board
-        							 , content
-                           			 ]             
-        -- _ ->            pictures [ content 
+        _ -> pictures [ --D.board
+                        Game.circlesAround Game.coords ,
+        							  content
+                           			 ]
+        -- _ ->            pictures [ content
         						 -- ]
 
 main :: IO ()
