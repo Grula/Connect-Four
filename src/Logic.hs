@@ -31,13 +31,13 @@ set' (i,j) e mat =
 
 --fromMatrixErr koji ako je Matrix validan vraca ga a ako nije neku default vrednost
 
-fromMatrixErr:: Matrix -> MatrixErr -> Matrix
+fromMatrixErr:: MatrixInt -> MatrixErr -> MatrixInt
 fromMatrixErr def mat = case mat of
                          Left _ -> def
                          Right x -> x
 
 
-type Matrix = M.Matrix Int
+type MatrixInt = M.Matrix Int
 --matrica ::Int-> Matrix
 
 --matrica n = M.matrix n n $ \(i,j)->elem
@@ -72,7 +72,7 @@ setFirstFree r mat=
 --ovde obavezno obraditi gresku
 --ovde StrErr a -- ili poruka o gresci ili vrednost
 
-setFirstFree':: Int ->Int->Matrix ->MatrixErr
+--setFirstFree':: Int ->Int->Matrix ->MatrixErr
 setFirstFree' c elem mat =
   let col = M.getCol c mat
       m = M.ncols mat
