@@ -6,6 +6,13 @@ import qualified Data.Matrix as M
 import qualified Data.Maybe as Mb
 import qualified Data.List as L
 
+import Debug.Trace
+
+data Item = R | B | U deriving Show
+instance Eq Item where
+                        (==) R R = True
+                        (==) B B = True
+                        (==) _ _ = False
 -- preimenovane funkcije
 --
 makeMat = M.zero 6 7
@@ -80,24 +87,42 @@ setFirstFree' c elem mat =
 type IntErr = Either String Int
 
 -- unosi se red a vraca se item ili porka da takvog nema
+-- fourInARow r mat=
+--   let row = M.getRow r mat
+--       list = V.toList row
+--       g = L.group list
+--       mf = L.find (\l -> length(l) >=4) g
+--   in case mf of
+--         Nothing -> Left "For in a row not found\n"
+--         Just (x:xs) -> Right x
+
+-- --obrada maybe a sa caseovima
+-- fourInACol c mat=
+--   let col = M.getCol c mat
+--       list = V.toList col
+--       g = L.group list
+--       mf = L.find (\l -> length(l) >=4) g
+--   in case mf of
+--         Nothing -> Left "For in a row not found\n"
+--         Just (x:xs) -> Right x
+
 fourInARow r mat=
   let row = M.getRow r mat
       list = V.toList row
       g = L.group list
       mf = L.find (\l -> length(l) >=4) g
-  in case mf of
-        Nothing -> Left "For in a row not found\n"
-        Just (x:xs) -> Right x
+  in if Mb.isNothing mf
+      then False
+      else True
 
---obrada maybe a sa caseovima
 fourInACol c mat=
   let col = M.getCol c mat
       list = V.toList col
       g = L.group list
       mf = L.find (\l -> length(l) >=4) g
-  in case mf of
-        Nothing -> Left "For in a row not found\n"
-        Just (x:xs) -> Right x
+  in if Mb.isNothing mf
+      then False
+      else True
 
 -- funkcija koja mapira matricu
 -- Red -> -1
@@ -149,16 +174,17 @@ getDiags (i, j) mat = let
                           indices2 = (reverse (zip [i,i-1..1] [j..m])) ++ (zip [i+1..n] [j-1, j-2..1])
                       in (safeGetElems indices1 mat, safeGetElems indices2 mat)
 
-fourDiag :: (Eq a) => (Int, Int) -> M.Matrix a -> Bool
+fourDiag :: (Eq a, Show a) => (Int, Int) -> M.Matrix a -> Bool
 fourDiag (i, j) mat = let
                         (diag_list_1, diag_list_2) = getDiags (i, j) mat
                         g1 = L.group diag_list_1
                         g2 = L.group diag_list_2 
                         mf1 = L.find (\l -> length(l) >= 4) g1
                         mf2 = L.find (\l -> length(l) >= 4) g2
+                        dbg1 = traceShow (diag_list_1)
                       in if Mb.isNothing mf1 && Mb.isNothing mf2
-                        then False
-                        else True
+                        then dbg1 $ False
+                        else dbg1 $ True
 
 -- fourDiag (i,j) mat = let 
 --                         upLeft = (safeGet i j mat):(safeGet (i-1) (j-1) mat):(safeGet (i-2) (j-2) mat):(safeGet (i-3) (j-3) mat):[];

@@ -10,25 +10,23 @@ import qualified Data.Matrix as M
 import Debug.Trace
 import Graphics.Gloss.Game
 
-data Item = Blue | Red | U deriving (Show, Eq)
-
 data ItemState = ItemState { position  :: B.Position
 						   , player :: Int -- -1, 1
 						   } deriving Show
 
 data Mode = ModeSplash
 		  | ModeStart
-		  | ModeWon
-		  | ModeLost
+		  | ModeWonBlue
+		  | ModeWonRed
 		  | ModeClick
 		  deriving(Show, Eq)
 
 data State = State { objectsState  :: [ItemState]
-				   , currentPlayer :: Int
+				   , currentPlayer :: Lg.Item
 				   , mode          :: Mode
 				   , windowSize    :: (Int, Int)
 				   , contentScale  :: Float
-                   , itemMatrix    :: M.Matrix Item
+                   , itemMatrix    :: M.Matrix Lg.Item
 				   } deriving Show
 
 -- addState :: B.Position -> ItemState
@@ -40,30 +38,42 @@ data State = State { objectsState  :: [ItemState]
 -- Respoond when mouse is clicked
 handleEvent :: Event -> State -> State
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeStart }
-handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let dbg1 = traceShow (x, y)
-																	 in
-																	 	dbg1 $
+-- Testing functions
+-- handleEvent (EventKey (SpecialKey KeyDown) Down _ _) state = state { mode = ModeWonBlue }
+-- handleEvent (EventKey (SpecialKey KeyUp) Down _ _) state = state { mode = ModeWonRed }
+handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let 
+                                                                        dbg1 = traceShow (x, y)
+                                                                        dbg2 = traceShow (coordsToIndices (x, y))
+                                                                        player = currentPlayer state
+                                                                        newMatrix = M.setElem player (i, j) (itemMatrix state)
+                                                                        (i, j) = coordsToIndices (x, y)
+                                                                        m = mode state
+																	 in if m == ModeWonRed || m == ModeWonBlue
+                                                                        then state
+                                                                     else if (Lg.fourDiag (i, j) newMatrix) || (Lg.fourInARow i newMatrix) || (Lg.fourInACol j newMatrix)
+                                                                        then if player == Lg.R then state { mode = ModeWonRed } else state { mode = ModeWonBlue } 
+                                                                     else
+																	 	dbg1 $ dbg2 $
 																	 	state { mode = ModeClick
 																		   	  , objectsState = addState x y state
-																		   	  , currentPlayer = negate $ currentPlayer state
+																		   	  , currentPlayer = if player == Lg.R then Lg.B else Lg.R
+                                                                              , itemMatrix = newMatrix
 																		      }
 handleEvent _ state = state
 
--- Search in matrix for four connected dots
-existsFour state item = True
 
-addState :: Float -> Float -> State ->[ItemState]
-addState x y state = ItemState { position = coordsToReal (x,y), player = negate $ player $ head $ Game.objectsState state } : objectsState state
+
+addState :: Float -> Float -> State -> [ItemState]
+addState x y state = let objects = objectsState state
+                         realCords = coordsToReal(x,y)
+                         exists = any (\item ->  (position item)==realCords) objects
+                      in if exists then objects else [ItemState { position = coordsToReal (x,y), player = negate $ player $ head$ Game.objectsState state }] ++ objects
 
 
 y_osa = [159.5, 159.5-63.5..(-158.5)]
 x_osa = [-202.5, -202.5+66.. 195.5]
 
 -- x = (-141.5, 158.5)::(Float, Float)
-
-
-
-
 
 
 
@@ -86,9 +96,6 @@ coordsToReal (x, y) = let (i, j) = coordsToIndices (x, y)
 
 coords = [(x,y) | x <- x_osa, y <- y_osa]
 
-circlesAround:: [(Float,Float)] -> Picture
-circlesAround coords = pictures $ fmap (\(x,y)-> color blue $ translate x y $ circle 28) coords
-
 
 
 mat = M.fromList 7 6 coords
@@ -108,17 +115,14 @@ initialState = State { objectsState = [ItemState { position = (-2000,-2000) -- h
 				     , mode         = ModeSplash
 				     , windowSize   = C.windowSize
 				     , contentScale = 1
-				     , currentPlayer = 1
+				     , currentPlayer = Lg.B
+                     , itemMatrix = M.matrix 6 7 $ \(_, _) -> Lg.U
                      }
 
 
 -- Game update
 update :: Game.State -> Game.State
-update oldState =
-		let newState  = oldState
-			-- dbg = traceShow $ currentPlayer oldState
-		in if	existsFour newState Game.objectsState then oldState { mode = ModeWon }
-		   else  newState
+update oldState = oldState
 
 -- isItemPositionValid position =
 
