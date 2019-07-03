@@ -2,12 +2,12 @@ module Game where
 
 import qualified Board as B
 import qualified Config as C
-
 import qualified Data.List as L
 import qualified Data.Maybe as Mb
 import qualified Data.Matrix as M
 import Debug.Trace
 import Graphics.Gloss.Game
+
 
 data ItemState = ItemState { position  :: B.Position
 						   , player :: Int -- -1, 1
@@ -49,17 +49,17 @@ handleEvent _ state = state
 existsFour state item = True
 
 addState :: Float -> Float -> State ->[ItemState]
-addState x y state = [ItemState { position = coordsToReal (x,y), player = negate $ player $ head$ Game.objectsState state }] ++ objectsState state
+addState x y state = let objects = objectsState state
+                         realCords = coordsToReal(x,y)
+                         exists = any (\item ->  (position item)==realCords) objects
+                      in if exists then objects else [ItemState { position = coordsToReal (x,y), player = negate $ player $ head$ Game.objectsState state }] ++ objects
+
 
 
 y_osa = [159.5, 159.5-63.5..(-158.5)]
 x_osa = [-202.5, -202.5+66.. 195.5]
 
 -- x = (-141.5, 158.5)::(Float, Float)
-
-
-
-
 
 
 
@@ -81,9 +81,6 @@ coordsToReal (x, y) = let (i, j) = coordsToIndices (x, y)
                       in ((x_osa !! (j-1)), (y_osa !! (i-1))) --hack
 
 coords = [(x,y) | x <- x_osa, y <- y_osa]
-
-circlesAround:: [(Float,Float)] -> Picture
-circlesAround coords = pictures $ fmap (\(x,y)-> color blue $ translate x y $ circle 28) coords
 
 
 

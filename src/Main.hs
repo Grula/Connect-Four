@@ -9,7 +9,12 @@ import qualified Display as D
 import qualified Board
 import qualified Game
 import qualified Config
-import qualified Pictures
+import qualified Pictures as P
+
+circlesAround:: [(Float,Float)] -> Picture
+circlesAround coords = pictures $ fmap (\(x,y)->  translate x y $ P.grey_circle) coords
+
+
 
 render :: Game.State -> Picture
 render state =
@@ -20,7 +25,7 @@ render state =
     in case Game.mode state of
         Game.ModeSplash -> splashScreen
         _ -> pictures [ --D.board
-                        Game.circlesAround Game.coords ,
+                        circlesAround Game.coords ,
         							  content
                            			 ]
         -- _ ->            pictures [ content

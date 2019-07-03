@@ -9,5 +9,6 @@ red_circle = png "data/red_circle.png"
 blue_circle = png "data/blue_circle.png"
 green_circle = png "data/green_circle.png"
 yellow_circle = png "data/yellow_circle.png"
+grey_circle = png "data/grey_circle.png"
 
 splash = png "data/splash.png"
