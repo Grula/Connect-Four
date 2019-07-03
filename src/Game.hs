@@ -71,7 +71,7 @@ coordsToIndices (x, y) = let
 
 coordsToReal :: (Float, Float) -> (Float, Float)
 coordsToReal (x, y) = let (i, j) = coordsToIndices (x, y)
-                      in ((x_osa !! i), (y_osa !! j))
+                      in ((x_osa !! (j-1)), (y_osa !! (i-1))) --hack
 
 coords = [(x,y) | x <- x_osa, y <- y_osa]
 
