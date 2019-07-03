@@ -27,8 +27,6 @@ data State = State { objectsState  :: [ItemState]
 				   , contentScale  :: Float
 				   } deriving Show
 
-
-
 -- addState :: B.Position -> ItemState
 -- addState coordinates = ItemState { position = coordinates
 -- 								 , player = 1 -- TODO: make player whos turn it is
@@ -60,7 +58,7 @@ x_osa = [-202.5, -202.5+66.. 195.5]
 -- x = (-141.5, 158.5)::(Float, Float)
 
 coordsToIndices :: (Float, Float) -> (Int, Int)
-coordsToIndices (x, y) = let 
+coordsToIndices (x, y) = let
                             distances = fmap (\r -> abs(x-r)) x_osa
                             min_distance_x = minimum distances
                             mmin_index = L.findIndex (==min_distance_x) distances
@@ -69,18 +67,17 @@ coordsToIndices (x, y) = let
                             min_distance_y = minimum distances_y
                             mmin_index_y = L.findIndex (==min_distance_y) distances_y
                             min_index_y = Mb.fromMaybe (-1) mmin_index_y
-                         in (min_index, min_index_y)
+                         in (min_index_y+1, min_index+1) --fixed indexes: [1..]
 
 coordsToReal :: (Float, Float) -> (Float, Float)
 coordsToReal (x, y) = let (i, j) = coordsToIndices (x, y)
                       in ((x_osa !! i), (y_osa !! j))
 
--- coords = [(x,y) | x <- x_osa, y <- y_osa]
+coords = [(x,y) | x <- x_osa, y <- y_osa]
 
--- mat = M.fromList 7 6 coords
--- tmat = M.transpose mat
+mat = M.fromList 7 6 coords
+tmat = M.transpose mat
 -- ova matrica tmat predstavlja matricu koordinata krugova sa ekrana ispravnim redosledom
-
 
 
 
