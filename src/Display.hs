@@ -24,6 +24,8 @@ redC state =
 
 splash :: Picture
 splash = P.splash
+splashB = P.splashBlue
+splashR = P.splashRed
 
 board :: Picture
 board =  P.board

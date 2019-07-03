@@ -15,8 +15,8 @@ data ItemState = ItemState { position  :: B.Position
 
 data Mode = ModeSplash
 		  | ModeStart
-		  | ModeWon
-		  | ModeLost
+		  | ModeWonBlue
+		  | ModeWonRed
 		  | ModeClick
 		  deriving(Show, Eq)
 
@@ -36,6 +36,9 @@ data State = State { objectsState  :: [ItemState]
 -- Respoond when mouse is clicked
 handleEvent :: Event -> State -> State
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeStart }
+-- Testing functions
+-- handleEvent (EventKey (SpecialKey KeyDown) Down _ _) state = state { mode = ModeWonBlue }
+-- handleEvent (EventKey (SpecialKey KeyUp) Down _ _) state = state { mode = ModeWonRed }
 handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let dbg1 = traceShow (x, y)
 																	 in
 																	 	dbg1 $
@@ -45,15 +48,13 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let dbg1 = 
 																		      }
 handleEvent _ state = state
 
--- Search in matrix for four connected dots
-existsFour state item = True
+
 
 addState :: Float -> Float -> State ->[ItemState]
 addState x y state = let objects = objectsState state
                          realCords = coordsToReal(x,y)
                          exists = any (\item ->  (position item)==realCords) objects
                       in if exists then objects else [ItemState { position = coordsToReal (x,y), player = negate $ player $ head$ Game.objectsState state }] ++ objects
-
 
 
 y_osa = [159.5, 159.5-63.5..(-158.5)]
@@ -105,12 +106,22 @@ initialState = State { objectsState = [ItemState { position = (-2000,-2000) -- h
                      }
 
 
+-- TODO: To be implemented
+-- Search in matrix for four connected dots
+existsFourP1 :: State -> Int -> Bool
+existsFourP1 state p = False
+
+existsFourP2 :: State -> Int -> Bool
+existsFourP2 state p = False
+
+
 -- Game update
 update :: Game.State -> Game.State
 update oldState =
 		let newState  = oldState
 			-- dbg = traceShow $ currentPlayer oldState
-		in if	existsFour newState Game.objectsState then oldState { mode = ModeWon }
+		in if	existsFourP1 newState (Game.currentPlayer newState) then oldState { mode = ModeWonRed }
+		   else if existsFourP2 newState (Game.currentPlayer newState) then oldState {mode = ModeWonBlue }
 		   else  newState
 
 -- isItemPositionValid position =

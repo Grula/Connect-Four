@@ -12,3 +12,6 @@ yellow_circle = png "data/yellow_circle.png"
 grey_circle = png "data/grey_circle.png"
 
 splash = png "data/splash.png"
+splashBlue = png "data/blue_splash.png"
+splashRed = png "data/red_splash.png"
+
