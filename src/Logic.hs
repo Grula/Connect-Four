@@ -11,11 +11,6 @@ import qualified Data.List as L
 makeMat = M.zero 6 7
 setF = setFirstFree'
 
-
-
-
---data Item = Blue | Red | U deriving (Show, Eq)
-
 --konstrukcija matrice
 
 --type MatrixErr = Either String (M.Matrix Item)
@@ -50,13 +45,7 @@ set i j elem mat = M.setElem elem (i,j) mat
 -- data je kolona treba postaviti na  prvu undef vrednost dati element
 
 
-
-
 sample = set 6 5 1 $ set 6 6 1 $ set 3 3 (-1) $ set 4 3 (-1) $ set 5 3 (-1) $ set 6 3 (-1) $ set 6 2 (-1) $ set 6 4 1 $ M.zero 6 7
-
-
-
-
 
 
 -- za ove funkcije treba obraditi slucajeve ako se unese neispravan indeks
@@ -110,17 +99,11 @@ fourInACol c mat=
         Nothing -> Left "For in a row not found\n"
         Just (x:xs) -> Right x
 
-
---treba da vidim kako izbrojati tacno da li ih ima 4 u redu
---ne moze ovako
-
-
 -- funkcija koja mapira matricu
 -- Red -> -1
 -- Blue -> 1
 -- U -> 0
 
--- treba namapirati celo sranje,
 --trazi int -> Int -> Int ne znam zasto
 --slika :: Int -> Item -> Int
 --slika _ e = case e of

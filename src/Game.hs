@@ -2,12 +2,15 @@ module Game where
 
 import qualified Board as B
 import qualified Config as C
+import qualified Logic as Lg
 
 import qualified Data.List as L
 import qualified Data.Maybe as Mb
 import qualified Data.Matrix as M
 import Debug.Trace
 import Graphics.Gloss.Game
+
+data Item = Blue | Red | U deriving (Show, Eq)
 
 data ItemState = ItemState { position  :: B.Position
 						   , player :: Int -- -1, 1
@@ -25,6 +28,7 @@ data State = State { objectsState  :: [ItemState]
 				   , mode          :: Mode
 				   , windowSize    :: (Int, Int)
 				   , contentScale  :: Float
+                   , itemMatrix    :: M.Matrix Item
 				   } deriving Show
 
 -- addState :: B.Position -> ItemState
@@ -49,7 +53,7 @@ handleEvent _ state = state
 existsFour state item = True
 
 addState :: Float -> Float -> State ->[ItemState]
-addState x y state = [ItemState { position = coordsToReal (x,y), player = negate $ player $ head$ Game.objectsState state }] ++ objectsState state
+addState x y state = ItemState { position = coordsToReal (x,y), player = negate $ player $ head $ Game.objectsState state } : objectsState state
 
 
 y_osa = [159.5, 159.5-63.5..(-158.5)]

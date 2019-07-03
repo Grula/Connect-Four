@@ -29,7 +29,7 @@ render state =
 main :: IO ()
 main = let size       = Config.windowSize
            position   = (0, 0)
-           fps        = 30
+           fps        = 60
            background = white
            window     = InWindow "Connect Four" size position
            updates    = \ _ state -> case Game.mode state of
