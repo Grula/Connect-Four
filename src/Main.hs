@@ -11,27 +11,23 @@ import qualified Game
 import qualified Config
 import qualified Pictures as P
 
-circlesAround:: [(Float,Float)] -> Picture
-circlesAround coords = pictures $ fmap (\(x,y)->  translate x y $ P.grey_circle) coords
+-- circlesAround:: [(Float,Float)] -> Picture
+-- circlesAround coords = pictures $ fmap (\(x,y)->  translate x y $ P.grey_circle) coords
 
 
 
 render :: Game.State -> Picture
-render state =
-    let splashScreen = D.splash
-    	redW = D.splashR
-    	blueW = D.splashB
-        blueCircle = D.blueC
-        content = pictures $ fmap D.redC $ Game.objectsState state
-
-    in case Game.mode state of
-        Game.ModeSplash -> splashScreen
-        Game.ModeWonBlue -> blueW
-        Game.ModeWonRed -> redW
-        _ ->				pictures [ --D.board
-                       circlesAround Game.coords
-        							 , content
-                           			 ]
+render state = let 
+                    splashScreen = D.splash
+                    redW = D.splashR
+                    blueW = D.splashB 
+                    blueCircle = D.blueC
+                    content = pictures $ fmap D.piece $ Game.objectsState state
+               in case Game.mode state of
+                    Game.ModeSplash -> splashScreen
+                    Game.ModeWonBlue -> blueW
+                    Game.ModeWonRed -> redW
+                    _ ->	pictures [ D.board, content]
 
 main :: IO ()
 main = let size       = Config.windowSize

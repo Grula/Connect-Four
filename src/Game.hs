@@ -60,8 +60,11 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state =
 			      }
 handleEvent _ state = state
 
-y_osa = [159.5, 159.5-63.5..(-158.5)]
-x_osa = [-202.5, -202.5+66.. 195.5]
+width = fromIntegral $ fst C.windowSize
+height' = fromIntegral $ snd C.windowSize 
+height = height' * 6 / 7
+y_osa = L.take 6 [height/2 - height/6, height/2 - height/6 - height/6..]
+x_osa = L.take 7 [-width/2 + width/14, -width/2 + width/14 + width/7..]
 coordsMatrix = M.matrix (length y_osa) (length x_osa) (\(i, j) -> (x_osa !! (j-1), y_osa !! (i-1)))
 coords = [(x, y) | x <- x_osa, y <- y_osa]
 
