@@ -18,6 +18,7 @@ data Mode = ModeSplash
 		  | ModeStart
 		  | ModeWonBlue
 		  | ModeWonRed
+      | ModeClick
 		  deriving(Show, Eq)
 
 data State = State { objectsState  :: [ItemState]
@@ -37,7 +38,7 @@ data State = State { objectsState  :: [ItemState]
 -- Respoond when mouse is clicked
 handleEvent :: Event -> State -> State
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeStart }
-handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let 
+handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let
                                                                         dbg1 = traceShow (x, y)
                                                                         dbg2 = traceShow (coordsToIndices (x, y))
                                                                         player = currentPlayer state
@@ -47,7 +48,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let
 																	 in if m == ModeWonRed || m == ModeWonBlue
                                                                         then state
                                                                      else if (Lg.fourDiag (i, j) newMatrix) || (Lg.fourInARow i newMatrix) || (Lg.fourInACol j newMatrix)
-                                                                        then if player == Lg.R then state { mode = ModeWonRed } else state { mode = ModeWonBlue } 
+                                                                        then if player == Lg.R then state { mode = ModeWonRed } else state { mode = ModeWonBlue }
                                                                      else
 																	 	dbg1 $ dbg2 $
 																	 	state { mode = ModeClick

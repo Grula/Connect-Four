@@ -23,7 +23,7 @@ setF = setFirstFree'
 --type MatrixErr = Either String (M.Matrix Item)
 --predstavlja ili matricu ili poruku o gresci
 
-type MatrixErr = Either String (M.Matrix Int)
+type MatrixErr = Either String (MatrixItem)
 
 set' (i,j) e mat =
   let n = M.nrows mat
@@ -33,13 +33,13 @@ set' (i,j) e mat =
 
 --fromMatrixErr koji ako je Matrix validan vraca ga a ako nije neku default vrednost
 
-fromMatrixErr:: MatrixInt -> MatrixErr -> MatrixInt
+fromMatrixErr:: MatrixItem -> MatrixErr -> MatrixItem
 fromMatrixErr def mat = case mat of
                          Left _ -> def
                          Right x -> x
 
 
-type MatrixInt = M.Matrix Int
+type MatrixItem = M.Matrix Item
 --matrica ::Int-> Matrix
 
 --matrica n = M.matrix n n $ \(i,j)->elem
@@ -52,7 +52,14 @@ set i j elem mat = M.setElem elem (i,j) mat
 -- data je kolona treba postaviti na  prvu undef vrednost dati element
 
 
-sample = set 6 5 1 $ set 6 6 1 $ set 3 3 (-1) $ set 4 3 (-1) $ set 5 3 (-1) $ set 6 3 (-1) $ set 6 2 (-1) $ set 6 4 1 $ M.zero 6 7
+--sample = set 6 5 1 $ set 6 6 1 $ set 3 3 (-1) $ set 4 3 (-1) $ set 5 3 (-1) $ set 6 3 (-1) $ set 6 2 (-1) $ set 6 4 1 $ M.zero 6 7
+
+
+sample = set 6 5 B $ set 6 6 B $ set 3 3 R  $ set 4 3 R $ set 5 3 R $ set 6 3 R
+         $ set 6 2 R $ set 6 4 B $ M.matrix 6 7 $ \(i,j)-> U
+
+
+
 
 
 -- za ove funkcije treba obraditi slucajeve ako se unese neispravan indeks
@@ -68,15 +75,36 @@ setFirstFree r mat=
 --ovde obavezno obraditi gresku
 --ovde StrErr a -- ili poruka o gresci ili vrednost
 
---setFirstFree':: Int ->Int->Matrix ->MatrixErr
+
 setFirstFree' c elem mat =
   let col = M.getCol c mat
       m = M.ncols mat
       list = V.toList col
-      posU = if (head $ head $ L.group list) == 0 then
-                                                  length( head $ L.group list)
+      hd = (head $ head $ L.group list)
+      posU = if hd `notElem` [R,B] then
+                              length( head $ L.group list)
                                                  else -1;
   in if posU == (-1) then Left "Can't set element" else (set' (posU, c) elem mat)
+
+--ne radi jer je nedefinisano ponasanje Eq za U
+
+firstFreeIndices:: Int -> M.Matrix Item -> Mb.Maybe (Int,Int)
+firstFreeIndices c mat =
+  let col=M.getCol c mat
+      m = M.ncols mat
+      listofUs = L.takeWhile (\i -> i `notElem` [R,B]) $ V.toList col
+
+   in if listofUs == [] then Nothing else Just $(length listofUs, c)
+
+setFirstFree'':: Int ->Item->MatrixItem->MatrixErr
+setFirstFree'' c elem mat =
+  let col=M.getCol c mat
+      m = M.ncols mat
+      listofUs = L.takeWhile (\i -> i `notElem` [R,B]) $ V.toList col
+
+   in if listofUs == [] then Left "Can't set element" else Right $ M.setElem elem (length listofUs,c) mat
+
+
 
 
 
@@ -130,11 +158,12 @@ fourInACol c mat=
 -- U -> 0
 
 --trazi int -> Int -> Int ne znam zasto
---slika :: Int -> Item -> Int
---slika _ e = case e of
-    --        Red -> 1
-  --          Blue -> 2
-      --      U -> 0
+slika :: Int -> Item
+slika e
+  | e==0 = U
+  | e==(-1) = R
+  | e == 1 = B
+  | otherwise = U
 
 --slika' item = case item of
 --               Red -> 1
@@ -178,7 +207,7 @@ fourDiag :: (Eq a, Show a) => (Int, Int) -> M.Matrix a -> Bool
 fourDiag (i, j) mat = let
                         (diag_list_1, diag_list_2) = getDiags (i, j) mat
                         g1 = L.group diag_list_1
-                        g2 = L.group diag_list_2 
+                        g2 = L.group diag_list_2
                         mf1 = L.find (\l -> length(l) >= 4) g1
                         mf2 = L.find (\l -> length(l) >= 4) g2
                         dbg1 = traceShow (diag_list_1)
@@ -186,7 +215,7 @@ fourDiag (i, j) mat = let
                         then dbg1 $ False
                         else dbg1 $ True
 
--- fourDiag (i,j) mat = let 
+-- fourDiag (i,j) mat = let
 --                         upLeft = (safeGet i j mat):(safeGet (i-1) (j-1) mat):(safeGet (i-2) (j-2) mat):(safeGet (i-3) (j-3) mat):[];
 --                         upRight = (safeGet i j mat):(safeGet (i-1) (j+1) mat):(safeGet (i-2) (j+2) mat):(safeGet (i-3) (j+3) mat):[];
 --                         downLeft = (safeGet i j mat):(safeGet (i+1) (j-1) mat):(safeGet (i+2) (j-2) mat):(safeGet (i+3) (j-3) mat):[];
