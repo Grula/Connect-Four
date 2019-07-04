@@ -38,37 +38,41 @@ data State = State { objectsState  :: [ItemState]
 -- Respoond when mouse is clicked
 handleEvent :: Event -> State -> State
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeStart }
-handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = let
-                                                                        dbg1 = traceShow (x, y)
-                                                                        dbg2 = traceShow (coordsToIndices (x, y))
-                                                                        player = currentPlayer state
-                                                                        newMatrix = M.setElem player (i, j) (itemMatrix state)
-                                                                        (i, j) = coordsToIndices (x, y)
-                                                                        m = mode state
-																	 in if m == ModeWonRed || m == ModeWonBlue
-                                                                        then state
-                                                                     else if (Lg.fourDiag (i, j) newMatrix) || (Lg.fourInARow i newMatrix) || (Lg.fourInACol j newMatrix)
-                                                                        then if player == Lg.R then state { mode = ModeWonRed } else state { mode = ModeWonBlue }
-                                                                     else
-																	 	dbg1 $ dbg2 $
-																	 	state { mode = ModeClick
-																		   	  , objectsState = addState x y state
-																		   	  , currentPlayer = if player == Lg.R then Lg.B else Lg.R
-                                                                              , itemMatrix = newMatrix
-																		      }
+handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = 
+    let dbg1 = traceShow (x, y)
+        player = currentPlayer state
+        oldMatrix = itemMatrix state
+        (_, column) = coordsToIndices (x, y)
+        (i, j) = Lg.firstFreeIndices column oldMatrix
+        newMatrix = M.setElem player (i, j) oldMatrix
+        m = mode state
+        dbg2 = traceShow ((i, j))
+	 in if m == ModeWonRed || m == ModeWonBlue
+            then state
+        else if (Lg.fourDiag (i, j) newMatrix) || (Lg.fourInARow i newMatrix) || (Lg.fourInACol j newMatrix)
+            then if player == Lg.R then state { mode = ModeWonRed } else state { mode = ModeWonBlue }
+        else
+    	 	dbg1 $ dbg2 $
+    	 	state { mode = ModeClick
+    		   	  , objectsState = addState i j state
+    		   	  , currentPlayer = if player == Lg.R then Lg.B else Lg.R
+                  , itemMatrix = newMatrix
+			      }
 handleEvent _ state = state
-
-
-
-addState :: Float -> Float -> State -> [ItemState]
-addState x y state = let objects = objectsState state
-                         realCords = coordsToReal(x,y)
-                         exists = any (\item ->  (position item)==realCords) objects
-                      in if exists then objects else [ItemState { position = coordsToReal (x,y), player = negate $ player $ head$ Game.objectsState state }] ++ objects
-
 
 y_osa = [159.5, 159.5-63.5..(-158.5)]
 x_osa = [-202.5, -202.5+66.. 195.5]
+coordsMatrix = M.matrix (length y_osa) (length x_osa) (\(i, j) -> (x_osa !! (j-1), y_osa !! (i-1)))
+coords = [(x, y) | x <- x_osa, y <- y_osa]
+
+addState :: Int -> Int -> State -> [ItemState]
+addState i j state =
+    let objects = objectsState state
+        coords = M.getElem i j coordsMatrix
+        exists = any (\item ->  (position item)==coords) objects
+    in if exists 
+        then objects 
+        else [ItemState { position = coords, player = negate $ player $ head$ Game.objectsState state }] ++ objects
 
 -- x = (-141.5, 158.5)::(Float, Float)
 
@@ -91,12 +95,11 @@ coordsToReal :: (Float, Float) -> (Float, Float)
 coordsToReal (x, y) = let (i, j) = coordsToIndices (x, y)
                       in ((x_osa !! (j-1)), (y_osa !! (i-1))) --hack
 
-coords = [(x,y) | x <- x_osa, y <- y_osa]
 
 
 
-mat = M.fromList 7 6 coords
-tmat = M.transpose mat
+-- mat = M.fromList 7 6 coords
+-- tmat = M.transpose mat
 -- ova matrica tmat predstavlja matricu koordinata krugova sa ekrana ispravnim redosledom
 
 

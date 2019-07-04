@@ -16,7 +16,6 @@ instance Eq Item where
 -- preimenovane funkcije
 --
 makeMat = M.zero 6 7
-setF = setFirstFree'
 
 --konstrukcija matrice
 
@@ -59,51 +58,35 @@ sample = set 6 5 B $ set 6 6 B $ set 3 3 R  $ set 4 3 R $ set 5 3 R $ set 6 3 R
          $ set 6 2 R $ set 6 4 B $ M.matrix 6 7 $ \(i,j)-> U
 
 
-
-
-
--- za ove funkcije treba obraditi slucajeve ako se unese neispravan indeks
-setFirstFree r mat=
-  let vec = M.getCol r mat
-      list = V.toList vec
-      --mlastU = (V.findIndex (\e -> e /= U)) - 1 vec --indeksiranje u vektoru krece od 0
-      --last = Mb.fromMaybe -1 mlastU
-
-   in mat
-
-
 --ovde obavezno obraditi gresku
 --ovde StrErr a -- ili poruka o gresci ili vrednost
 
 
-setFirstFree' c elem mat =
-  let col = M.getCol c mat
-      m = M.ncols mat
-      list = V.toList col
-      hd = (head $ head $ L.group list)
-      posU = if hd `notElem` [R,B] then
-                              length( head $ L.group list)
-                                                 else -1;
-  in if posU == (-1) then Left "Can't set element" else (set' (posU, c) elem mat)
+-- setFirstFree' c elem mat =
+--   let col = M.getCol c mat
+--       m = M.ncols mat
+--       list = V.toList col
+--       hd = (head $ head $ L.group list)
+--       posU = if hd `notElem` [R,B] then
+--                               length( head $ L.group list)
+--                                                  else -1;
+--   in if posU == (-1) then Left "Can't set element" else (set' (posU, c) elem mat)
 
---ne radi jer je nedefinisano ponasanje Eq za U
+--ne radi jer je nedefinisano ponasanje Eq za
 
-firstFreeIndices:: Int -> M.Matrix Item -> Mb.Maybe (Int,Int)
+firstFreeIndices:: Int -> M.Matrix Item -> (Int,Int)
 firstFreeIndices c mat =
+  let col = M.getCol c mat
+      columnList = V.toList col
+      listofUs = L.takeWhile (\i -> i `notElem` [R,B]) columnList
+  in (length listofUs, c)
+
+setFirstFree :: Int -> Item -> MatrixItem -> MatrixErr
+setFirstFree c elem mat =
   let col=M.getCol c mat
       m = M.ncols mat
       listofUs = L.takeWhile (\i -> i `notElem` [R,B]) $ V.toList col
-
-   in if listofUs == [] then Nothing else Just $(length listofUs, c)
-
-setFirstFree'':: Int ->Item->MatrixItem->MatrixErr
-setFirstFree'' c elem mat =
-  let col=M.getCol c mat
-      m = M.ncols mat
-      listofUs = L.takeWhile (\i -> i `notElem` [R,B]) $ V.toList col
-
-   in if listofUs == [] then Left "Can't set element" else Right $ M.setElem elem (length listofUs,c) mat
-
+  in if listofUs == [] then Left "Can't set element" else Right $ M.setElem elem (length listofUs,c) mat
 
 
 
@@ -214,16 +197,6 @@ fourDiag (i, j) mat = let
                       in if Mb.isNothing mf1 && Mb.isNothing mf2
                         then dbg1 $ False
                         else dbg1 $ True
-
--- fourDiag (i,j) mat = let
---                         upLeft = (safeGet i j mat):(safeGet (i-1) (j-1) mat):(safeGet (i-2) (j-2) mat):(safeGet (i-3) (j-3) mat):[];
---                         upRight = (safeGet i j mat):(safeGet (i-1) (j+1) mat):(safeGet (i-2) (j+2) mat):(safeGet (i-3) (j+3) mat):[];
---                         downLeft = (safeGet i j mat):(safeGet (i+1) (j-1) mat):(safeGet (i+2) (j-2) mat):(safeGet (i+3) (j-3) mat):[];
---                         downRight = (safeGet i j mat):(safeGet (i+1) (j+1) mat):(safeGet (i+2) (j+2) mat):(safeGet (i+3) (j+3) mat):[];
---                         together = all (== head upLeft) upLeft : all (== head upRight) upRight : all (== head downLeft) downLeft : all (== head downRight) downRight :[];
---                       in  if (or together) then Right (mat M.! (i,j))
---                             else Left "Diagonal not found!"
-
 
 --sample1 = [U,U,U,U, Red,Red]
 --sample2 = [Red,Blue,Red,Red,Red,Red]
