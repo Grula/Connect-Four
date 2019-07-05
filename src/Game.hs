@@ -11,15 +11,17 @@ import Debug.Trace
 import Graphics.Gloss.Game
 
 data ItemState = ItemState { position  :: B.Position
+                           , indices :: (Int, Int)
 						   , player :: Int -- -1, 1
 						   } deriving Show
 
 data Mode = ModeSplash
-		  | ModeStart
-		  | ModeWonBlue
-		  | ModeWonRed
-      | ModeClick
-		  deriving(Show, Eq)
+          | ModeStart
+          | ModeWonBlue
+          | ModeWonRed
+          | ModeClick
+          | ModeDrop
+          deriving(Show, Eq)
 
 data State = State { objectsState  :: [ItemState]
 				   , currentPlayer :: Lg.Item
@@ -28,11 +30,6 @@ data State = State { objectsState  :: [ItemState]
 				   , contentScale  :: Float
                    , itemMatrix    :: M.Matrix Lg.Item
 				   } deriving Show
-
--- addState :: B.Position -> ItemState
--- addState coordinates = ItemState { position = coordinates
--- 								 , player = 1 -- TODO: make player whos turn it is
--- 								 }
 
 -- Key events
 -- Respoond when mouse is clicked
@@ -47,13 +44,13 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state =
         newMatrix = M.setElem player (i, j) oldMatrix
         m = mode state
         dbg2 = traceShow ((i, j))
-	 in if m == ModeWonRed || m == ModeWonBlue
+	 in if m `elem` [ModeWonBlue, ModeWonRed, ModeDrop]
             then state
         else if (Lg.fourDiag (i, j) newMatrix) || (Lg.fourInARow i newMatrix) || (Lg.fourInACol j newMatrix)
             then if player == Lg.R then state { mode = ModeWonRed } else state { mode = ModeWonBlue }
         else
     	 	dbg1 $ dbg2 $
-    	 	state { mode = ModeClick
+    	 	state { mode = ModeDrop
     		   	  , objectsState = addState i j state
     		   	  , currentPlayer = if player == Lg.R then Lg.B else Lg.R
                   , itemMatrix = newMatrix
@@ -62,7 +59,10 @@ handleEvent _ state = state
 
 width = fromIntegral $ fst C.windowSize
 height' = fromIntegral $ snd C.windowSize 
+-- height needs to be adjusted to the board, which is 7x6 boxes
 height = height' * 6 / 7
+-- coordinates of centers from each box,
+-- adjusted for offset from top of the window
 y_osa = L.take 6 [height/2 - height/6, height/2 - height/6 - height/6..]
 x_osa = L.take 7 [-width/2 + width/14, -width/2 + width/14 + width/7..]
 coordsMatrix = M.matrix (length y_osa) (length x_osa) (\(i, j) -> (x_osa !! (j-1), y_osa !! (i-1)))
@@ -71,11 +71,11 @@ coords = [(x, y) | x <- x_osa, y <- y_osa]
 addState :: Int -> Int -> State -> [ItemState]
 addState i j state =
     let objects = objectsState state
-        coords = M.getElem i j coordsMatrix
-        exists = any (\item ->  (position item)==coords) objects
+        (x, _) = M.getElem i j coordsMatrix
+        exists = any (\item ->  (indices item) == (1, j)) objects
     in if exists 
         then objects 
-        else [ItemState { position = coords, player = negate $ player $ head$ Game.objectsState state }] ++ objects
+        else ItemState { indices = (i, j), position = (x, height/2), player = negate $ player $ head$ Game.objectsState state } : objects
 
 -- x = (-141.5, 158.5)::(Float, Float)
 
@@ -112,7 +112,8 @@ coordsToReal (x, y) = let (i, j) = coordsToIndices (x, y)
 
 initialState :: State
 initialState = State { objectsState = [ItemState { position = (-2000,-2000) -- hack avoid this
-												 , player = 1
+												 , indices = (-1, -1)
+                                                 , player = 1
 												 }
 									  ]
 				     , mode         = ModeSplash
@@ -123,9 +124,30 @@ initialState = State { objectsState = [ItemState { position = (-2000,-2000) -- h
                      }
 
 
+speed = 5 :: Float
+
+
+topItemInColumn_y :: Int -> [ItemState] -> Float
+topItemInColumn_y col items = let res = L.find (\t -> col == snd (indices t)) items
+                              in case res of
+                                Just r -> snd (position r) + height/6
+                                Nothing -> last y_osa
+
 -- Game update
 update :: Game.State -> Game.State
-update oldState = oldState
+update oldState = let 
+                    m = mode oldState
+                    (dropItem:rest) = objectsState oldState
+                  in case m of
+                    ModeDrop -> 
+                        let (x, y) = position dropItem
+                            (i, j) = indices dropItem
+                            dbg1 = traceShow (x, y)
+                            minH = topItemInColumn_y j rest 
+                        in if y - speed > minH
+                            then oldState {objectsState = dropItem{position = (x, y - speed)} : rest}
+                            else oldState {mode = ModeStart, objectsState = dropItem{position = (x, y_osa !! (i-1))} : rest}
+                    _ -> oldState
 
 -- isItemPositionValid position =
 
