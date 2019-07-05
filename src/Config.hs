@@ -1,6 +1,6 @@
 module Config where
 
-windowSize = (479, 403) :: (Int, Int)
+windowSize = (700, 700) :: (Int, Int)
 
 
 

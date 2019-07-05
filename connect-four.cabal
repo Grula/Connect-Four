@@ -16,9 +16,11 @@ extra-source-files:  README.md
 executable connect-four
   hs-source-dirs:      src
   main-is:             Main.hs
-  other-modules:	   Board Config Pictures Display Game
+  other-modules:	   Board Config Pictures Display Game Logic
   default-language:    Haskell2010
   build-depends:       base >= 4.7 && < 5,
                        gloss == 1.10.2.5,
                        gloss-game == 0.3.3.0,
-                       gloss-juicy == 0.2.2
+                       gloss-juicy == 0.2.2,
+                       matrix >= 0.3,
+                       vector

@@ -6,20 +6,23 @@ import qualified Data.Matrix as M
 import qualified Data.Maybe as Mb
 import qualified Data.List as L
 
+import Debug.Trace
+
+data Item = R | B | U deriving Show
+instance Eq Item where
+                        (==) R R = True
+                        (==) B B = True
+                        (==) _ _ = False
 -- preimenovane funkcije
 --
-makeMat = matrica
-setF = setFirstFree'
-
-
-
-
-data Item = Blue | Red | U deriving (Show, Eq)
+makeMat = M.zero 6 7
 
 --konstrukcija matrice
 
-type MatrixErr = Either String (M.Matrix Item)
+--type MatrixErr = Either String (M.Matrix Item)
 --predstavlja ili matricu ili poruku o gresci
+
+type MatrixErr = Either String (MatrixItem)
 
 set' (i,j) e mat =
   let n = M.nrows mat
@@ -29,17 +32,17 @@ set' (i,j) e mat =
 
 --fromMatrixErr koji ako je Matrix validan vraca ga a ako nije neku default vrednost
 
-fromMatrixErr:: Matrix -> MatrixErr -> Matrix
+fromMatrixErr:: MatrixItem -> MatrixErr -> MatrixItem
 fromMatrixErr def mat = case mat of
                          Left _ -> def
                          Right x -> x
 
 
-type Matrix = M.Matrix Item
-matrica ::Int-> Matrix
+type MatrixItem = M.Matrix Item
+--matrica ::Int-> Matrix
 
-matrica n = M.matrix n n $ \(i,j)->elem
-            where elem=U
+--matrica n = M.matrix n n $ \(i,j)->elem
+--            where elem=U
 
 -- postavi (i, j) element na elem, bez provere funkcija
 set i j elem mat = M.setElem elem (i,j) mat
@@ -48,34 +51,43 @@ set i j elem mat = M.setElem elem (i,j) mat
 -- data je kolona treba postaviti na  prvu undef vrednost dati element
 
 
+--sample = set 6 5 1 $ set 6 6 1 $ set 3 3 (-1) $ set 4 3 (-1) $ set 5 3 (-1) $ set 6 3 (-1) $ set 6 2 (-1) $ set 6 4 1 $ M.zero 6 7
 
 
-sample = set 6 5 Red $ set 6 6 Red $ set 3 3 Blue $ set 4 3 Blue $ set 5 3 Blue $ set 6 3 Blue $ set 6 2 Red $ set 6 4 Red $ matrica 6
-
-
-
--- za ove funkcije treba obraditi slucajeve ako se unese neispravan indeks
-setFirstFree r mat=
-  let vec = M.getCol r mat
-      list = V.toList vec
-      --mlastU = (V.findIndex (\e -> e /= U)) - 1 vec --indeksiranje u vektoru krece od 0
-      --last = Mb.fromMaybe -1 mlastU
-
-   in mat
+sample = set 6 5 B $ set 6 6 B $ set 3 3 R  $ set 4 3 R $ set 5 3 R $ set 6 3 R
+         $ set 6 2 R $ set 6 4 B $ M.matrix 6 7 $ \(i,j)-> U
 
 
 --ovde obavezno obraditi gresku
 --ovde StrErr a -- ili poruka o gresci ili vrednost
 
-setFirstFree':: Int ->Item ->Matrix ->MatrixErr
-setFirstFree' c elem mat =
+
+-- setFirstFree' c elem mat =
+--   let col = M.getCol c mat
+--       m = M.ncols mat
+--       list = V.toList col
+--       hd = (head $ head $ L.group list)
+--       posU = if hd `notElem` [R,B] then
+--                               length( head $ L.group list)
+--                                                  else -1;
+--   in if posU == (-1) then Left "Can't set element" else (set' (posU, c) elem mat)
+
+--ne radi jer je nedefinisano ponasanje Eq za
+
+firstFreeIndices:: Int -> M.Matrix Item -> Mb.Maybe (Int,Int)
+firstFreeIndices c mat =
   let col = M.getCol c mat
+      columnList = V.toList col
+      listofUs = L.takeWhile (\i -> i `notElem` [R,B]) columnList
+  in if listofUs == [] then Nothing else Just (length listofUs, c)
+
+setFirstFree :: Int -> Item -> MatrixItem -> MatrixErr
+setFirstFree c elem mat =
+  let col=M.getCol c mat
       m = M.ncols mat
-      list = V.toList col
-      posU = if (head $ head $ L.group list) == U then
-                                                  length( head $ L.group list)
-                                                 else -1;
-  in if posU == (-1) then Left "Can't set element" else (set' (posU, c) elem mat)
+      listofUs = L.takeWhile (\i -> i `notElem` [R,B]) $ V.toList col
+  in if listofUs == [] then Left "Can't set element" else Right $ M.setElem elem (length listofUs,c) mat
+
 
 
 
@@ -83,51 +95,65 @@ setFirstFree' c elem mat =
 
 --dat vektor da li ima 4 elementa e
 
-type ItemErr = Either Item String
+type IntErr = Either String Int
+
 -- unosi se red a vraca se item ili porka da takvog nema
+-- fourInARow r mat=
+--   let row = M.getRow r mat
+--       list = V.toList row
+--       g = L.group list
+--       mf = L.find (\l -> length(l) >=4) g
+--   in case mf of
+--         Nothing -> Left "For in a row not found\n"
+--         Just (x:xs) -> Right x
+
+-- --obrada maybe a sa caseovima
+-- fourInACol c mat=
+--   let col = M.getCol c mat
+--       list = V.toList col
+--       g = L.group list
+--       mf = L.find (\l -> length(l) >=4) g
+--   in case mf of
+--         Nothing -> Left "For in a row not found\n"
+--         Just (x:xs) -> Right x
+
 fourInARow r mat=
   let row = M.getRow r mat
       list = V.toList row
       g = L.group list
       mf = L.find (\l -> length(l) >=4) g
-  in case mf of
-        Nothing -> Right "For in a row not found\n"
-        Just (x:xs) -> Left x
+  in if Mb.isNothing mf
+      then False
+      else True
 
---obrada maybe a sa caseovima
 fourInACol c mat=
   let col = M.getCol c mat
       list = V.toList col
       g = L.group list
       mf = L.find (\l -> length(l) >=4) g
-  in case mf of
-        Nothing -> Right "For in a row not found\n"
-        Just (x:xs) -> Left x
-
-
---treba da vidim kako izbrojati tacno da li ih ima 4 u redu
---ne moze ovako
-
+  in if Mb.isNothing mf
+      then False
+      else True
 
 -- funkcija koja mapira matricu
 -- Red -> -1
 -- Blue -> 1
 -- U -> 0
 
--- treba namapirati celo sranje,
 --trazi int -> Int -> Int ne znam zasto
-slika :: Int -> Item -> Int
-slika _ e = case e of
-            Red -> 1
-            Blue -> 2
-            U -> 0
+slika :: Int -> Item
+slika e
+  | e==0 = U
+  | e==(-1) = R
+  | e == 1 = B
+  | otherwise = U
 
-slika' item = case item of
-               Red -> 1
-               Blue -> 2
-               U -> 0
+--slika' item = case item of
+--               Red -> 1
+--               Blue -> 2
+--               U -> 0
 
-mappedSample = fmap slika' sample
+--mappedSample = fmap slika' sample
 
 
 --konverzija u listu listi
@@ -143,21 +169,38 @@ mappedSample = fmap slika' sample
 --data je (i,j) pozicija i matrica, ako se nalazi dijagonalno 4 elementa od te pozicije, vraca taj element, u suprotnom poruku da nema 4 dijagonalno
 safeGet = M.safeGet
 
+-- Gets elements from matrix mat from indices in the list
+safeGetElems :: [(Int, Int)] -> M.Matrix a -> [Maybe a]
+safeGetElems [] _ = []
+safeGetElems ((i, j) : rest) mat = let elem = safeGet i j mat
+                                   in if Mb.isNothing elem
+                                    then [Nothing]
+                                    else elem : (safeGetElems rest mat)
 
-fourDiag (i,j) mat =
+-- Gets diagonals of element at (i, j)
+getDiags :: (Int, Int) -> M.Matrix a -> ([Maybe a], [Maybe a])
+getDiags (i, j) mat = let
+                          n = M.nrows mat
+                          m = M.ncols mat
+                          indices1 = (reverse (zip [i,i-1..1] [j,j-1..1])) ++ (zip [i+1..n] [j+1..m])
+                          indices2 = (reverse (zip [i,i-1..1] [j..m])) ++ (zip [i+1..n] [j-1, j-2..1])
+                      in (safeGetElems indices1 mat, safeGetElems indices2 mat)
 
-  let upLeft = (safeGet i j mat):(safeGet (i-1) (j-1) mat):(safeGet (i-2) (j-2) mat):(safeGet (i-3) (j-3) mat):[];
-      upRight = (safeGet i j mat):(safeGet (i-1) (j+1) mat):(safeGet (i-2) (j+2) mat):(safeGet (i-3) (j+3) mat):[];
-      downLeft = (safeGet i j mat):(safeGet (i+1) (j-1) mat):(safeGet (i+2) (j-2) mat):(safeGet (i+3) (j-3) mat):[];
-      downRight = (safeGet i j mat):(safeGet (i+1) (j+1) mat):(safeGet (i+2) (j+2) mat):(safeGet (i+3) (j+3) mat):[];
-      together = all (== head upLeft) upLeft : all (== head upRight) upRight : all (== head downLeft) downLeft : all (== head downRight) downRight :[];
-      in  if (or together) then Left (mat M.! (i,j))
-                           else Right "Diagonal not found!"
+fourDiag :: (Eq a, Show a) => (Int, Int) -> M.Matrix a -> Bool
+fourDiag (i, j) mat = let
+                        (diag_list_1, diag_list_2) = getDiags (i, j) mat
+                        g1 = L.group diag_list_1
+                        g2 = L.group diag_list_2
+                        mf1 = L.find (\l -> length(l) >= 4) g1
+                        mf2 = L.find (\l -> length(l) >= 4) g2
+                        dbg1 = traceShow (diag_list_1)
+                      in if Mb.isNothing mf1 && Mb.isNothing mf2
+                        then dbg1 $ False
+                        else dbg1 $ True
 
-
-sample1 = [U,U,U,U, Red,Red]
-sample2 = [Red,Blue,Red,Red,Red,Red]
-sample3 = [U,U,U,U, U, U ]
+--sample1 = [U,U,U,U, Red,Red]
+--sample2 = [Red,Blue,Red,Red,Red,Red]
+--sample3 = [U,U,U,U, U, U ]
 
 
 someFunc :: IO ()
