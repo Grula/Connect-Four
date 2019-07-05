@@ -74,12 +74,12 @@ sample = set 6 5 B $ set 6 6 B $ set 3 3 R  $ set 4 3 R $ set 5 3 R $ set 6 3 R
 
 --ne radi jer je nedefinisano ponasanje Eq za
 
-firstFreeIndices:: Int -> M.Matrix Item -> (Int,Int)
+firstFreeIndices:: Int -> M.Matrix Item -> Mb.Maybe (Int,Int)
 firstFreeIndices c mat =
   let col = M.getCol c mat
       columnList = V.toList col
       listofUs = L.takeWhile (\i -> i `notElem` [R,B]) columnList
-  in (length listofUs, c)
+  in if listofUs == [] then Nothing else Just (length listofUs, c)
 
 setFirstFree :: Int -> Item -> MatrixItem -> MatrixErr
 setFirstFree c elem mat =

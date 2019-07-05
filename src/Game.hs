@@ -12,8 +12,8 @@ import Graphics.Gloss.Game
 
 data ItemState = ItemState { position  :: B.Position
                            , indices :: (Int, Int)
-						   , player :: Int -- -1, 1
-						   } deriving Show
+                           , player :: Int -- -1, 1
+                           } deriving Show
 
 data Mode = ModeSplash
           | ModeStart
@@ -21,40 +21,42 @@ data Mode = ModeSplash
           | ModeWonRed
           | ModeClick
           | ModeDrop
+          | ModeInit
           deriving(Show, Eq)
 
 data State = State { objectsState  :: [ItemState]
-				   , currentPlayer :: Lg.Item
-				   , mode          :: Mode
-				   , windowSize    :: (Int, Int)
-				   , contentScale  :: Float
-                   , itemMatrix    :: M.Matrix Lg.Item
-				   } deriving Show
+             , currentPlayer :: Lg.Item
+             , mode          :: Mode
+             , windowSize    :: (Int, Int)
+             , contentScale  :: Float
+             , itemMatrix    :: M.Matrix Lg.Item
+             } deriving Show
 
 -- Key events
 -- Respoond when mouse is clicked
 handleEvent :: Event -> State -> State
-handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeStart }
+handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeInit }
 handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = 
     let dbg1 = traceShow (x, y)
         player = currentPlayer state
         oldMatrix = itemMatrix state
         (_, column) = coordsToIndices (x, y)
-        (i, j) = Lg.firstFreeIndices column oldMatrix
-        newMatrix = M.setElem player (i, j) oldMatrix
-        m = mode state
-        dbg2 = traceShow ((i, j))
-	 in if m `elem` [ModeWonBlue, ModeWonRed, ModeDrop]
-            then state
-        else if (Lg.fourDiag (i, j) newMatrix) || (Lg.fourInARow i newMatrix) || (Lg.fourInACol j newMatrix)
-            then if player == Lg.R then state { mode = ModeWonRed } else state { mode = ModeWonBlue }
-        else
-    	 	dbg1 $ dbg2 $
-    	 	state { mode = ModeDrop
-    		   	  , objectsState = addState i j state
-    		   	  , currentPlayer = if player == Lg.R then Lg.B else Lg.R
-                  , itemMatrix = newMatrix
-			      }
+    in case Lg.firstFreeIndices column oldMatrix of
+        Nothing -> state
+        Just (i, j) -> 
+            let
+                newMatrix = M.setElem player (i, j) oldMatrix
+                m = mode state
+                dbg2 = traceShow ((i, j))
+            in if m `elem` [ModeWonBlue, ModeWonRed, ModeDrop]
+                then state
+            else
+               dbg1 $ dbg2 $
+               state { mode = ModeDrop
+                     , objectsState = addState i j state
+                     , currentPlayer = if player == Lg.R then Lg.B else Lg.R
+                     , itemMatrix = newMatrix
+                     }
 handleEvent _ state = state
 
 width = fromIntegral $ fst C.windowSize
@@ -112,19 +114,19 @@ coordsToReal (x, y) = let (i, j) = coordsToIndices (x, y)
 
 initialState :: State
 initialState = State { objectsState = [ItemState { position = (-2000,-2000) -- hack avoid this
-												 , indices = (-1, -1)
+                               , indices = (-1, -1)
                                                  , player = 1
-												 }
-									  ]
-				     , mode         = ModeSplash
-				     , windowSize   = C.windowSize
-				     , contentScale = 1
-				     , currentPlayer = Lg.B
+                               }
+                          ]
+               , mode         = ModeSplash
+               , windowSize   = C.windowSize
+               , contentScale = 1
+               , currentPlayer = Lg.B
                      , itemMatrix = M.matrix 6 7 $ \(_, _) -> Lg.U
                      }
 
 
-speed = 5 :: Float
+speed = 10.0 :: Float
 
 
 topItemInColumn_y :: Int -> [ItemState] -> Float
@@ -135,27 +137,26 @@ topItemInColumn_y col items = let res = L.find (\t -> col == snd (indices t)) it
 
 -- Game update
 update :: Game.State -> Game.State
-update oldState = let 
-                    m = mode oldState
-                    (dropItem:rest) = objectsState oldState
-                  in case m of
-                    ModeDrop -> 
-                        let (x, y) = position dropItem
-                            (i, j) = indices dropItem
-                            dbg1 = traceShow (x, y)
-                            minH = topItemInColumn_y j rest 
-                        in if y - speed > minH
-                            then oldState {objectsState = dropItem{position = (x, y - speed)} : rest}
-                            else oldState {mode = ModeStart, objectsState = dropItem{position = (x, y_osa !! (i-1))} : rest}
-                    _ -> oldState
-
--- isItemPositionValid position =
-
--- objectsUpdate :: Game.State -> [ItemState]
--- objectsUpdate oldState =  [ItemState { position = (0,0)
--- 									 , player = 1
--- 									 }
--- 						  ]
--- objectsUpdate oldState =
--- 	let newItemState = case
-
+update oldState = 
+    let 
+        m = mode oldState
+        (dropItem:rest) = objectsState oldState
+      in case m of
+            ModeDrop -> 
+                let (x, y) = position dropItem
+                    (i, j) = indices dropItem
+                    dbg1 = traceShow (x, y)
+                    minH = topItemInColumn_y j rest 
+                in if y - speed > minH
+                    then oldState {objectsState = dropItem{position = (x, y - speed)} : rest}
+                    else oldState {mode = ModeStart, objectsState = dropItem{position = (x, y_osa !! (i-1))} : rest}
+            ModeStart -> 
+                let 
+                    (i, j) = indices dropItem
+                    mat = itemMatrix oldState
+                    player = currentPlayer oldState
+                in 
+                    if (Lg.fourDiag (i, j) mat) || (Lg.fourInARow i mat) || (Lg.fourInACol j mat)
+                        then if player == Lg.R then oldState { mode = ModeWonBlue } else oldState { mode = ModeWonRed }
+                        else oldState
+            _ -> oldState
