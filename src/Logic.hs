@@ -54,7 +54,7 @@ set i j elem mat = M.setElem elem (i,j) mat
 --sample = set 6 5 1 $ set 6 6 1 $ set 3 3 (-1) $ set 4 3 (-1) $ set 5 3 (-1) $ set 6 3 (-1) $ set 6 2 (-1) $ set 6 4 1 $ M.zero 6 7
 
 
-sample = set 6 5 B $ set 6 6 B $ set 3 3 R  $ set 4 3 R $ set 5 3 R $ set 6 3 R
+sample = set 2 3 R $ set 1 3 R $ set 6 5 B $ set 6 6 B $ set 3 3 R  $ set 4 3 R $ set 5 3 R $ set 6 3 R
          $ set 6 2 R $ set 6 4 B $ M.matrix 6 7 $ \(i,j)-> U
 
 
@@ -74,12 +74,12 @@ sample = set 6 5 B $ set 6 6 B $ set 3 3 R  $ set 4 3 R $ set 5 3 R $ set 6 3 R
 
 --ne radi jer je nedefinisano ponasanje Eq za
 
-firstFreeIndices:: Int -> M.Matrix Item -> (Int,Int)
+--firstFreeIndices:: Int -> M.Matrix Item -> (Int,Int)
 firstFreeIndices c mat =
   let col = M.getCol c mat
       columnList = V.toList col
       listofUs = L.takeWhile (\i -> i `notElem` [R,B]) columnList
-  in (length listofUs, c)
+  in  (length listofUs, c)
 
 setFirstFree :: Int -> Item -> MatrixItem -> MatrixErr
 setFirstFree c elem mat =
@@ -118,7 +118,9 @@ type IntErr = Either String Int
 --         Just (x:xs) -> Right x
 
 fourInARow r mat=
-  let row = M.getRow r mat
+  let numrows = M.nrows mat
+      validr = r `elem` [1..numrows]
+      row = if validr then (M.getRow r mat) else V.replicate numrows U
       list = V.toList row
       g = L.group list
       mf = L.find (\l -> length(l) >=4) g
@@ -127,7 +129,9 @@ fourInARow r mat=
       else True
 
 fourInACol c mat=
-  let col = M.getCol c mat
+  let numcols = M.ncols mat
+      validc =  c `elem` [1..numcols]
+      col = if validc then M.getCol c mat else V.replicate numcols U
       list = V.toList col
       g = L.group list
       mf = L.find (\l -> length(l) >=4) g
@@ -195,7 +199,7 @@ fourDiag (i, j) mat = let
                         mf2 = L.find (\l -> length(l) >= 4) g2
                         dbg1 = traceShow (diag_list_1)
                       in if Mb.isNothing mf1 && Mb.isNothing mf2
-                        then dbg1 $ False
+                        then  False
                         else dbg1 $ True
 
 --sample1 = [U,U,U,U, Red,Red]

@@ -32,19 +32,19 @@ data State = State { objectsState  :: [ItemState]
 -- addState :: B.Position -> ItemState
 -- addState coordinates = ItemState { position = coordinates
 -- 								 , player = 1 -- TODO: make player whos turn it is
--- 								 }
+--
 
 -- Key events
 -- Respoond when mouse is clicked
 handleEvent :: Event -> State -> State
 handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeStart }
-handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = 
+handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state =
     let dbg1 = traceShow (x, y)
         player = currentPlayer state
         oldMatrix = itemMatrix state
         (_, column) = coordsToIndices (x, y)
         (i, j) = Lg.firstFreeIndices column oldMatrix
-        newMatrix = M.setElem player (i, j) oldMatrix
+        newMatrix = if (i > 0) then M.setElem player (i, j) oldMatrix else oldMatrix
         m = mode state
         dbg2 = traceShow ((i, j))
 	 in if m == ModeWonRed || m == ModeWonBlue
@@ -54,7 +54,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state =
         else
     	 	dbg1 $ dbg2 $
     	 	state { mode = ModeClick
-    		   	  , objectsState = addState i j state
+             , objectsState =  if (i>0) then addState i j state else objectsState state
     		   	  , currentPlayer = if player == Lg.R then Lg.B else Lg.R
                   , itemMatrix = newMatrix
 			      }
@@ -70,8 +70,8 @@ addState i j state =
     let objects = objectsState state
         coords = M.getElem i j coordsMatrix
         exists = any (\item ->  (position item)==coords) objects
-    in if exists 
-        then objects 
+    in if exists
+        then objects
         else [ItemState { position = coords, player = negate $ player $ head$ Game.objectsState state }] ++ objects
 
 -- x = (-141.5, 158.5)::(Float, Float)
@@ -119,6 +119,10 @@ initialState = State { objectsState = [ItemState { position = (-2000,-2000) -- h
                      , itemMatrix = M.matrix 6 7 $ \(_, _) -> Lg.U
                      }
 
+resetItemMatrix::M.Matrix Lg.Item -> M.Matrix Lg.Item
+resetItemMatrix mat = let n = M.ncols mat
+                          m = M.nrows mat
+                      in M.matrix m n $ \(_, _) -> Lg.U
 
 -- Game update
 update :: Game.State -> Game.State
