@@ -22,6 +22,7 @@ data Mode = ModeSplash
           | ModeClick
           | ModeDrop
           | ModeInit
+          | ModeCheck
           deriving(Show, Eq)
 
 data State = State { objectsState  :: [ItemState]
@@ -51,7 +52,7 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state =
             in if m `elem` [ModeWonBlue, ModeWonRed, ModeDrop]
                 then state
             else
-               dbg1 $ dbg2 $
+               dbg1 $
                state { mode = ModeDrop
                      , objectsState = addState i j state
                      , currentPlayer = if player == Lg.R then Lg.B else Lg.R
@@ -114,14 +115,13 @@ coordsToReal (x, y) = let (i, j) = coordsToIndices (x, y)
 
 initialState :: State
 initialState = State { objectsState = [ItemState { position = (-2000,-2000) -- hack avoid this
-                               , indices = (-1, -1)
+                                                 , indices = (-1, -1)
                                                  , player = 1
-                               }
-                          ]
-               , mode         = ModeSplash
-               , windowSize   = C.windowSize
-               , contentScale = 1
-               , currentPlayer = Lg.B
+                                                 }]
+                     , mode          = ModeSplash
+                     , windowSize    = C.windowSize
+                     , contentScale  = 1
+                     , currentPlayer = Lg.B
                      , itemMatrix = M.matrix 6 7 $ \(_, _) -> Lg.U
                      }
 
@@ -149,8 +149,8 @@ update oldState =
                     minH = topItemInColumn_y j rest 
                 in if y - speed > minH
                     then oldState {objectsState = dropItem{position = (x, y - speed)} : rest}
-                    else oldState {mode = ModeStart, objectsState = dropItem{position = (x, y_osa !! (i-1))} : rest}
-            ModeStart -> 
+                    else oldState {mode = ModeCheck, objectsState = dropItem{position = (x, y_osa !! (i-1))} : rest}
+            ModeCheck -> 
                 let 
                     (i, j) = indices dropItem
                     mat = itemMatrix oldState
@@ -158,5 +158,5 @@ update oldState =
                 in 
                     if (Lg.fourDiag (i, j) mat) || (Lg.fourInARow i mat) || (Lg.fourInACol j mat)
                         then if player == Lg.R then oldState { mode = ModeWonBlue } else oldState { mode = ModeWonRed }
-                        else oldState
+                        else oldState {mode = ModeStart}
             _ -> oldState
