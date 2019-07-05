@@ -17,9 +17,9 @@ showAt (x, y) = translate x y
 
 piece :: Game.ItemState -> Picture
 piece state =  
-		let pl = Game.player state
-		in if (pl == 1 ) then showAt (Game.position state) $ P.red_circle
-		   else showAt (Game.position state) $ P.blue_circle
+  let pl = Game.player state
+  in if (pl == 1 ) then showAt (Game.position state) $ P.red_circle
+     else showAt (Game.position state) $ P.blue_circle
 
 
 splash :: Picture

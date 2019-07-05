@@ -27,7 +27,7 @@ render state = let
                     Game.ModeSplash -> splashScreen
                     Game.ModeWonBlue -> blueW
                     Game.ModeWonRed -> redW
-                    _ ->	pictures [content, D.board]
+                    _ ->  pictures [content, D.board]
 
 main :: IO ()
 main = let size       = Config.windowSize

@@ -36,7 +36,9 @@ data State = State { objectsState  :: [ItemState]
 -- Key events
 -- Respoond when mouse is clicked
 handleEvent :: Event -> State -> State
-handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = state { mode = ModeInit }
+handleEvent (EventKey (SpecialKey KeySpace) Down _ _) state = if mode state == ModeSplash 
+                                                                then state { mode = ModeInit } 
+                                                                else state
 handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state = 
     let dbg1 = traceShow (x, y)
         player = currentPlayer state
@@ -55,7 +57,6 @@ handleEvent (EventKey (MouseButton LeftButton) Down _ (x,y)) state =
                dbg1 $
                state { mode = ModeDrop
                      , objectsState = addState i j state
-                     , currentPlayer = if player == Lg.R then Lg.B else Lg.R
                      , itemMatrix = newMatrix
                      }
 handleEvent _ state = state
@@ -157,6 +158,6 @@ update oldState =
                     player = currentPlayer oldState
                 in 
                     if (Lg.fourDiag (i, j) mat) || (Lg.fourInARow i mat) || (Lg.fourInACol j mat)
-                        then if player == Lg.R then oldState { mode = ModeWonBlue } else oldState { mode = ModeWonRed }
-                        else oldState {mode = ModeStart}
+                        then if player == Lg.R then oldState { mode = ModeWonRed } else oldState { mode = ModeWonBlue }
+                        else oldState { mode = ModeStart, currentPlayer = if player == Lg.R then Lg.B else Lg.R }
             _ -> oldState
